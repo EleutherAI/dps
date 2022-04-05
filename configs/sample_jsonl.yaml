@@ -1,0 +1,9 @@
+base_dir: './test_data'
+targets: 
+    - 0
+    - 1
+    - 2
+    - 3
+output_dir: './test_output_data'
+sample_ratio: 0.1
+seed: 1234
