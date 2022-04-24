@@ -117,9 +117,7 @@ def replace_email(input_text: str) -> str:
 @_return_empty_string_for_invalid_input
 def replace_phone_number(input_text: str) -> str:
     """ Remove phone number in the input text """
-    regex_pattern = '[0-9]{3}-[0-9]{4}-[0-9]{4}'
-    
-    print(len(re.findall(regex_pattern, input_text)[0]))
+    regex_pattern = '[0-9]{2,3}-[0-9]{3,4}-[0-9]{4}'    
 
     return re.sub(regex_pattern, '<|tel|>', input_text)
 
@@ -194,7 +192,7 @@ if __name__ == "__main__":
             u"\U00010000-\U0010FFFF"  #BMP characters 이외
                             "]+", flags=re.UNICODE)
     
-    text_to_process = '<br>안녕하세요, 내 이름은 양승무야!!! 내 주민등록번호는 900022-1133098이고, 내 이메일 주소는 smyang@gmail.com 이고 전화번호는 010-2111-0223 이야<br>'
+    text_to_process = '<br>안녕하세요, 내 이름은 양승무야!!! 내 주민등록번호는 900022-1133098이고, 내 이메일 주소는 smyang@gmail.com 이고 전화번호는 02-211-0223 이야<br>'
     # print(only_BMP_pattern.sub(r'', text_to_process))# BMP characters만
     # print(only_BMP_pattern.sub(r'', text))# BMP characters만
     
