@@ -1,5 +1,3 @@
-
-# Standard libraries
 import os
 import re
 import string
@@ -10,20 +8,11 @@ from functools import wraps
 from unicodedata import normalize
 from typing import List, Optional, Union, Callable
 
-# Third party libraries
 import contractions
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize, PunktSentenceTokenizer
-from nltk.stem import PorterStemmer, SnowballStemmer, LancasterStemmer, WordNetLemmatizer
-from spellchecker import SpellChecker
-
-nltk.download('stopwords', quiet=True)
-nltk.download('wordnet', quiet=True)
-nltk.download('punkt', quiet=True)
-
-_CUSTOM_SUB_CSV_FILE_PATH = os.path.join(os.path.dirname(__file__), 'data/custom_substitutions.csv')
-# _IGNORE_SPELLCHECK_WORD_FILE_PATH = os.path.join(os.path.dirname(__file__), 'data/ignore_spellcheck_words.txt')
+from bs4 import BeautifulSoup
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
@@ -48,25 +37,6 @@ def _return_empty_string_for_invalid_input(func):
     return wrapper
 
 
-def _return_empty_list_for_invalid_input(func):
-    """ Return empty list if the input is None or empty """
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        if 'input_text_or_list' in kwargs:
-            input_text_or_list = kwargs['input_text_or_list']
-        else:
-            try:
-                input_text_or_list = args[0]
-            except IndexError as e:
-                LOGGER.exception('No appropriate positional argument is provide.')
-                raise e
-        if input_text_or_list is None or len(input_text_or_list) == 0:
-            return []
-        else:
-            return func(*args, **kwargs)
-    return wrapper
-
-
 # @_return_empty_string_for_invalid_input
 # def remove_number(input_text: str) -> str:
 #     """ Remove number in the input text """
@@ -77,7 +47,7 @@ def _return_empty_list_for_invalid_input(func):
 @_return_empty_string_for_invalid_input
 def remove_itemized_bullet_and_numbering(input_text: str) -> str:
     """ Remove bullets or numbering in itemized input """
-    processed_text = re.sub('[(\s][0-9a-zA-Z][.)]\s+|[(\s][ivxIVX]+[.)]\s+', ' ', input_text)
+    processed_text = re.sub('[^가-힣ㄱ-ㅎㅏ-ㅣ\\s]', "<>", input_text)
     return processed_text
 
 
@@ -86,6 +56,12 @@ def remove_url(input_text: str) -> str:
     """ Remove url in the input text """
     return re.sub('(www|http)\S+', '', input_text)
 
+
+def strip_html_tags(text):
+    """remove html tags from text"""
+    soup = BeautifulSoup(text, "html.parser")
+    stripped_text = soup.get_text(separator=" ")
+    return stripped_text
 
 @_return_empty_string_for_invalid_input
 def remove_punctuation(input_text: str, punctuations: Optional[str] = None) -> str:
@@ -109,11 +85,6 @@ def remove_special_character(input_text: str, special_characters: Optional[str] 
     return processed_text
 
 
-@_return_empty_string_for_invalid_input
-def keep_alpha_numeric(input_text: str) -> str:
-    """ Remove any character except alphanumeric characters """
-    return ''.join(c for c in input_text if c.isalnum())
-
 
 @_return_empty_string_for_invalid_input
 def remove_whitespace(input_text: str, remove_duplicate_whitespace: bool = True) -> str:
@@ -136,52 +107,38 @@ def normalize_unicode(input_text: str) -> str:
     return processed_tokens
 
 
-@_return_empty_list_for_invalid_input
-def remove_stopword(input_text_or_list: Union[str, List[str]], stop_words: Optional[set] = None) -> List[str]:
-    """ Remove stop words """
-
-    if stop_words is None:
-        stop_words = set(stopwords.words('english'))
-    if isinstance(stop_words, list):
-        stop_words = set(stop_words)
-    if isinstance(input_text_or_list, str):
-        tokens = word_tokenize(input_text_or_list)
-        processed_tokens = [token for token in tokens if token not in stop_words]
-    else:
-        processed_tokens = [token for token in input_text_or_list
-                            if (token not in stop_words and token is not None and len(token) > 0)]
-    return processed_tokens
-
-
 @_return_empty_string_for_invalid_input
-def remove_email(input_text: str) -> str:
+def replace_email(input_text: str) -> str:
     """ Remove email in the input text """
     regex_pattern = '[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}'
-    return re.sub(regex_pattern, '', input_text)
+    return re.sub(regex_pattern, '<email_number>', input_text)
 
 
 @_return_empty_string_for_invalid_input
-def remove_phone_number(input_text: str) -> str:
+def replace_phone_number(input_text: str) -> str:
     """ Remove phone number in the input text """
-    regex_pattern = '(?:\+?(\d{1,3}))?[-. (]*(\d{3})[-. )]*(\d{3})[-. ]*(\d{4})(?: *x(\d+))?'
-    return re.sub(regex_pattern, '', input_text)
+    regex_pattern = '[0-9]{3}-[0-9]{4}-[0-9]{4}'
+    
+    print(len(re.findall(regex_pattern, input_text)[0]))
+
+    return re.sub(regex_pattern, '<|tel|>', input_text)
 
 
 @_return_empty_string_for_invalid_input
-def remove_ssn(input_text: str) -> str:
+def replace_ssn(input_text: str) -> str:
     """ Remove social security number in the input text """
-    regex_pattern = '(?!219-09-9999|078-05-1120)(?!666|000|9\d{2})\d{3}-(?!00)\d{2}-(?!0{4})\d{4}|(' \
-                    '?!219099999|078051120)(?!666|000|9\d{2})\d{3}(?!00)\d{2}(?!0{4})\d{4}'
-    return re.sub(regex_pattern, '', input_text)
+    regex_pattern = "([0-9]{6})\\-[0-9]{7}"
+        # p = "[0-9]{6}\\-[0-9]{7}"
+    return re.sub(regex_pattern, '<|rrn|>', input_text)
 
 
-@_return_empty_string_for_invalid_input
-def remove_credit_card_number(input_text: str) -> str:
-    """ Remove credit card number in the input text """
-    regex_pattern = '(4[0-9]{12}(?:[0-9]{3})?|(?:5[1-5][0-9]{2}|222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][' \
-                    '0-9]|2720)[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|6(?:011|5[0-9]{2})[0-9]{12}|(' \
-                    '?:2131|1800|35\d{3})\d{11})'
-    return re.sub(regex_pattern, '', input_text)
+# @_return_empty_string_for_invalid_input
+# def remove_credit_card_number(input_text: str) -> str:
+#     """ Remove credit card number in the input text """
+#     regex_pattern = '(4[0-9]{12}(?:[0-9]{3})?|(?:5[1-5][0-9]{2}|222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][' \
+#                     '0-9]|2720)[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|6(?:011|5[0-9]{2})[0-9]{12}|(' \
+#                     '?:2131|1800|35\d{3})\d{11})'
+#     return re.sub(regex_pattern, '', input_text)
 
 
 def tokenize_word(input_text: str) -> List[str]:
@@ -203,15 +160,14 @@ def preprocess_text(input_text: str, processing_function_list: Optional[List[Cal
     """ Preprocess an input text by executing a series of preprocessing functions specified in functions list """
     if processing_function_list is None:
         processing_function_list = [remove_url,
-                                    remove_email,
-                                    remove_phone_number,
                                     remove_itemized_bullet_and_numbering,
                                     expand_contraction,
                                     remove_special_character,
+                                    replace_phone_number,
+                                    replace_ssn,
                                     remove_punctuation,
                                     remove_whitespace,
-                                    normalize_unicode,
-                                    remove_stopword,
+                                    normalize_unicode
                                     ]
     for func in processing_function_list:
         input_text = func(input_text)
@@ -220,6 +176,13 @@ def preprocess_text(input_text: str, processing_function_list: Optional[List[Cal
     else:
         processed_text = ' '.join(input_text)
     return processed_text
+
+
+def strip_html_tags(text):
+    """remove html tags from text"""
+    soup = BeautifulSoup(text, "html.parser")
+    stripped_text = soup.get_text(separator=" ")
+    return stripped_text
 
 
 if __name__ == "__main__":
@@ -231,15 +194,16 @@ if __name__ == "__main__":
             u"\U00010000-\U0010FFFF"  #BMP characters 이외
                             "]+", flags=re.UNICODE)
     
-    text_to_process = '안녕하세요, 내 이름은 양승무야!!! 내 이메일 주소는 smyang@atommerce.com.이고 전화번호는 010-2243-0223야'
+    text_to_process = '<br>안녕하세요, 내 이름은 양승무야!!! 내 주민등록번호는 900022-1133098이고, 내 이메일 주소는 smyang@gmail.com 이고 전화번호는 010-2111-0223 이야<br>'
     # print(only_BMP_pattern.sub(r'', text_to_process))# BMP characters만
     # print(only_BMP_pattern.sub(r'', text))# BMP characters만
     
     # preprocessed_text = preprocess_text(text_to_process)
     print(text_to_process)
 
-    preprocess_functions = [remove_email, remove_url, remove_ssn, remove_phone_number]
+    preprocess_functions = [replace_phone_number, replace_ssn]
     preprocessed_text = preprocess_text(text_to_process, preprocess_functions)
     print(preprocessed_text)
+    # print(replace_ssn(text_to_process))ㄷ
 
 
