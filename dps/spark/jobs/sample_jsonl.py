@@ -18,7 +18,7 @@ def sample_jsonl(config_path):
         df: DataFrame = spark.read.json(input_paths).repartition(10)
         df_json = df.distinct().repartition(1)
 
-        preprocess_functions = [reduce_emoticon, replace_phone_number, replace_ssn, remove_whitespace, strip_html_tags]
+        preprocess_functions = [reduce_emoticon, replace_phone_number, replace_rrn, remove_whitespace, strip_html_tags]
         df_json = df_json.toJSON().map(lambda x: json.loads(x)).collect()
         
         try:
