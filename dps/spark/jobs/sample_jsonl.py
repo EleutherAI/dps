@@ -4,7 +4,7 @@ from pyspark import SparkContext
 from pyspark.sql import DataFrame
 
 from ..spark_session import spark_session
-from ..utils.preprocessing import *
+from ..utils.text_normalize import *
 from pathlib import Path
 
 
