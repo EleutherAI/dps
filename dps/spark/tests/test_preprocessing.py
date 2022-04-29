@@ -1,18 +1,26 @@
-from dps.spark.utils.preprocessing import *
+from dps.spark.utils.text_normalize import *
 
 
-def test(text: str, methods: List) -> None:
-    if methods is None:
-        preprocessed_text = preprocess_text(text)
-        print(f"Before: {text}")
-        print(f"After: {preprocessed_text}")
-    else:
-        preprocessed_text = preprocess_text(text, methods)
-        print(f"Before: {text}")
-        print(f"After: {preprocessed_text}")
+def test_reduce_emoticon():
+    text = "영화 완전 웃기지 않았냐 ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ"
+    assert preprocess_text(text, [reduce_emoticon])
+    
+
+def test_replace_phone_number():
+    text = "내 전화 번호는 022-9298-1213이야"
+    assert preprocess_text(text, [replace_phone_number])
 
 
-if __name__ == "__main__":
-    text = '<br>안녕하세요,       내 이름은 이순신이야!!! 내 주민등록번호는 100022-1133098이고, 내 이메일 주소는 soonsin@gmail.com 이고 전화번호는 02-211-0223 이야   <br>'
-    preprocess_methods = [reduce_emoticon, replace_phone_number, replace_rrn, remove_whitespace, strip_html_tags]
-    test(text, preprocess_methods)
+def test_replace_rrn():
+    text = "내 주민등록번호는 141555-4124492이야"
+    assert preprocess_text(text, [replace_rrn])
+
+
+def test_remove_whitespace():
+    text = "아         오늘 저녁 맛있는거 먹고    싶    다. "
+    assert preprocess_text(text, [remove_whitespace])
+
+
+def test_strip_html_tags():
+    text = "<br> 안녕하세요 좋은 하루 되세요.!<br>"
+    assert preprocess_text(text, [strip_html_tags])
