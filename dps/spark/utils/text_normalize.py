@@ -12,7 +12,7 @@ def clean_text(input_text: str) -> str:
 
 
 def remove_url(input_text: str) -> str:
-    return re.sub('(www|http)\S+', '', input_text)
+    return re.sub('(www|http)\\S+', '', input_text)
 
 
 def strip_html_tags(text):
@@ -23,12 +23,12 @@ def strip_html_tags(text):
 
 def remove_whitespace(input_text: str, remove_duplicate_whitespace: bool = True) -> str:
     if remove_duplicate_whitespace:
-        return ' '.join(re.split('\s+', input_text.strip(), flags=re.UNICODE))
+        return ' '.join(re.split('\\s+', input_text.strip(), flags=re.UNICODE))
     return input_text.strip()
 
 
 def replace_email(input_text: str) -> str:
-    regex_pattern = '[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}'
+    regex_pattern = '[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}'
     return re.sub(regex_pattern, '<|email_address|>', input_text)
 
 
