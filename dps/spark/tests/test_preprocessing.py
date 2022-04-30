@@ -1,4 +1,4 @@
-from dps.spark.utils.text_normalize import *
+from dps.spark.utils.common_preprocess import *
 
 
 def test_reduce_emoticon():
