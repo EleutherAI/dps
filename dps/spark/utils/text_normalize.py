@@ -52,6 +52,13 @@ def reduce_emoticon(text: str, n=2):
     return emoticon_normalize(text, num_repeats=n)
 
 
+def strip_html_tags(text):
+    """remove html tags from text"""
+    soup = BeautifulSoup(text, "html.parser")
+    stripped_text = soup.get_text(separator=" ")
+    return stripped_text
+
+
 def preprocess_text(input_text: str, processing_function_list: Optional[List[Callable]] = None) -> str:
     if processing_function_list is None:
         processing_function_list = [remove_url,
@@ -69,8 +76,3 @@ def preprocess_text(input_text: str, processing_function_list: Optional[List[Cal
     return processed_text
 
 
-def strip_html_tags(text):
-    """remove html tags from text"""
-    soup = BeautifulSoup(text, "html.parser")
-    stripped_text = soup.get_text(separator=" ")
-    return stripped_text
