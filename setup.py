@@ -8,6 +8,7 @@ setup(
         'pyspark==3.2.1',
         'fire==0.3.1',
         'pyyaml',
-        'soynlp'
+        'soynlp',
+        'bs4'
     ]
 )
