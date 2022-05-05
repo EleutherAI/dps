@@ -7,109 +7,89 @@ import string
 
 class TestMassivTextFilters:
 
-    config_path = "../../../configs/massivetext_config.yaml"
-    with open(config_path) as f:
-        conf = yaml.load(f, Loader=yaml.FullLoader)
-    massiveTextFilters = MassiveTextFilters(conf)
+    # config for test code
+    config = {
+        "doc_len_filter": {"min": 50, "max": 100},
+        "mean_word_len_filter": {"min": 3, "max": 10},
+        "symbol_to_word_ratio_filter": {"ratio": 0.01},
+        "bullet_ellipsis_filter": {"bullet_point_ratio": 0.9, "ellipsis_ratio": 0.3},
+        "alphabetic_word_ratio_filter": {"ratio": 0.8},
+        "least_k_essential_words_filter": {
+            "k": 2,
+            "word_list": ["the", "be", "to", "of", "and", "that", "have", "with"],
+        },
+    }
+
+    massiveTextFilters = MassiveTextFilters(config)
 
     def test_doc_len_filter(self):
-        min_doc_len = self.conf["doc_len_filter"]["min"]
-        max_doc_len = self.conf["doc_len_filter"]["max"]
+        # case 1 : too short
+        example = {"text": "친환경업체(한살림 등)의 DDT파동으로 또 다시 술렁였습니다."}
+        assert self.massiveTextFilters.doc_len_filter(example) == False
 
-        less_than_min = "".join([random.choice(string.printable)
-                                for _ in range(random.randrange(0, min_doc_len))])
-        example = {"text": less_than_min}
-        assert self.massiveTextFilters.doc_len_filter(
-            example) == False  # Filtered
-
-        between_min_and_max = "".join([random.choice(string.printable) for _ in range(
-            random.randrange(min_doc_len, max_doc_len+1))])
-        example = {"text": between_min_and_max}
+        # case 2 : rigt size
+        example = {
+            "text": "얼마 전 살충제 계란 파동 등으로 씨끄러웠던 중 친환경업체(한살림 등)의 DDT파동으로 또 다시 술렁였습니다."
+        }
         assert self.massiveTextFilters.doc_len_filter(example) == True
 
-        greater_than_max = "".join([random.choice(string.printable) for _ in range(
-            random.randrange(max_doc_len+1, max_doc_len * 2))])
-        example = {"text": greater_than_max}
-        assert self.massiveTextFilters.doc_len_filter(
-            example) == False  # Filtered
+        # case 3 : too long
+        example = {
+            "text": "초과근무 시간을 연가일수로 산입 전환 □ 추진배경 ㅇ 공직의 생산성 및 경쟁력 향상을 위해 도입된 연가저축제 등 여러 가지 휴가 제도를 활성화 및 보완하기 위한 방안 □ 현황 및 문제점"
+        }
+        assert self.massiveTextFilters.doc_len_filter(example) == False
 
     def test_mean_word_len_filter(self):
-        min_word_len = self.conf["mean_word_len_filter"]["min"]
-        max_word_len = self.conf["mean_word_len_filter"]["max"]
+        # case 1 : mean word length too short
+        example = {"text": "월. 화. 수. 목. 금. 토."}
+        assert self.massiveTextFilters.mean_word_len_filter(example) == False
 
-        less_than_min = ""
-        for _ in range(random.randrange(10, 100)):  # word count
-            for _ in range(random.randrange(1, min_word_len)):  # word length
-                less_than_min += random.choice(
-                    string.printable.replace(" ", ""))
-            less_than_min += " "
-        example = {"text": less_than_min.strip()}
-        assert self.massiveTextFilters.mean_word_len_filter(
-            example) == False  # Filtered
-
-        between_min_and_max = ""
-        for _ in range(random.randrange(10, 100)):  # word count
-            for _ in range(random.randrange(min_word_len, max_word_len + 1)):  # word length
-                between_min_and_max += random.choice(
-                    string.printable.replace(" ", ""))
-            between_min_and_max += " "
-        example = {"text": between_min_and_max.strip()}
+        # case 2 : mean word length rigt size
+        example = {"text": "친환경업체(한살림 등)의 DDT파동으로 또 다시 술렁였습니다."}
         assert self.massiveTextFilters.mean_word_len_filter(example) == True
 
-        greater_than_max = ""
-        for _ in range(random.randrange(10, 100)):  # word count
-            for _ in range(random.randrange(max_word_len + 1, max_word_len * 2)):  # word length
-                greater_than_max += random.choice(
-                    string.printable.replace(" ", ""))
-            greater_than_max += " "
-        example = {"text": greater_than_max.strip()}
-        assert self.massiveTextFilters.mean_word_len_filter(
-            example) == False  # Filtered
+        # case 3 : mean word length too long
+        example = {"text": "얼마전살충제계란파동등으로씨끄러웠던중 친환경업체(한살림등)의DDT파동으로또다시술렁였습니다."}
+        assert self.massiveTextFilters.mean_word_len_filter(example) == False
 
     def test_symbol_to_word_ratio_filter(self):
-        printable = string.printable
-        symbols = ["…", "...", "#"]
-        for symbol in symbols:
-            printable = printable.replace(symbol, "")
-        symbol_to_word_ratio = self.conf["symbol_to_word_ratio_filter"]["ratio"]
+        # case 1 : too high symbol ratio
+        example = {"text": "아니... 이건 아니잖아요… #시험기간#넋두리"}
+        assert self.massiveTextFilters.symbol_to_word_ratio_filter(example) == False
 
-        equal_or_less_than_ratio = random.uniform(0.0, symbol_to_word_ratio)
-        symbol_count = int(1000 * equal_or_less_than_ratio)
-        word_count = 1000 - symbol_count
-        symbol_words = ["".join([random.choice(printable) for _ in range(
-            random.randrange(3, 10))]) + random.choice(symbols) for _ in range(symbol_count)]
-        without_symbol_words = ["".join([random.choice(printable) for _ in range(
-            random.randrange(3, 10))]) for _ in range(word_count)]
-        total_words = symbol_words + without_symbol_words
-        random.shuffle(total_words)
-        text = " ".join(total_words)
-        example = {"text": text}
-        assert self.massiveTextFilters.symbol_to_word_ratio_filter(
-            example) == True
-
-        greater_than_ratio = symbol_to_word_ratio + \
-            (1 - random.random()) * (1 - symbol_to_word_ratio)
-        word_count = int(1000*(1-greater_than_ratio))
-        symbol_count = 1000 - word_count
-        symbol_words = ["".join([random.choice(printable) for _ in range(
-            random.randrange(3, 10))]) + random.choice(symbols) for _ in range(symbol_count)]
-        without_symbol_words = ["".join([random.choice(printable) for _ in range(
-            random.randrange(3, 10))]) for _ in range(word_count)]
-        total_words = symbol_words + without_symbol_words
-        random.shuffle(total_words)
-        text = " ".join(total_words)
-        example = {"text": text}
-        assert self.massiveTextFilters.symbol_to_word_ratio_filter(
-            example) == False
+        # case 2 : right amount of symbol ratio
+        example = {"text": "아니 이건 아니잖아요 시험기간,넋두리"}
+        assert self.massiveTextFilters.symbol_to_word_ratio_filter(example) == True
 
     def test_bullet_ellipsis_filter(self):
-        # TODO
-        assert True
+        # case 1 : too high bullet & ellipsis symbol ratio
+        example = {
+            "text": "보리스 존슨 영국 총리와 볼로디미르 젤렌스키 우크라이나 대통령이 5일(현지시간) 통화를 하고 ...\n북한 미사일 규탄…기시다 개인 140명 등 대러 추가...\n 블라디미르 푸틴 러...\n제니퍼 그랜홈 미 에너지부 장...\n..."
+        }
+        assert self.massiveTextFilters.bullet_ellipsis_filter(example) == False
+
+        # case 4 : right amount of symbol ratio
+        example = {"text": "친환경업체(한살림 등)의 DDT파동으로 또 다시 술렁였습니다."}
+        assert self.massiveTextFilters.bullet_ellipsis_filter(example) == True
 
     def test_alphabetic_word_ratio_filter(self):
-        # TODO
-        assert True
+        # case 1 : too many non-alphabetic-character only words
+        example = {"text": "！ ＇ ， ． ￣ ： ； ‥ … ¨ 〃 ― ∥ ＼ ∼ ´ ～ ˇ ˘ ˝ ˚ ˙ ¸ ˛ ¡ ¿ ː"}
+        assert self.massiveTextFilters.alphabetic_word_ratio_filter(example) == False
+
+        # case 4 : right amount of alphabetic word ratio
+        example = {"text": "친환경업체(한살림 등)의 DDT파동으로 또 다시 술렁였습니다."}
+        assert self.massiveTextFilters.alphabetic_word_ratio_filter(example) == True
 
     def test_least_k_essential_words_filter(self):
-        # TODO
-        assert True
+        # case 1 : too many non-alphabetic-character only words
+        example = {
+            "text": "Table tennis at 1962 Asian Games Table tennis was contested at 1962 Asian Games at Istora Senayan in Jakarta, Indonesia, from 25 August 1962 31 August 1962."
+        }
+        assert self.massiveTextFilters.least_k_essential_words_filter(example) == False
+
+        # case 4 : right amount of alphabetic word ratio
+        example = {
+            "text": "Table tennis at the 1962 Asian Games Table tennis was contested at the 1962 Asian Games at the Istora Senayan in Jakarta, Indonesia, from 25 August 1962 to 31 August 1962. "
+        }
+        assert self.massiveTextFilters.least_k_essential_words_filter(example) == True
