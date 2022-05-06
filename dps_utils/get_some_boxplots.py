@@ -1,9 +1,3 @@
-# $ python dps_utils/get_some_boxplots.py 
-# --input_path=dps_utils/ko_multi_lang_train_sample.xlsx
-# --data_type nsmc campuspick_post 우리말샘
-
-# --save_dir=dps_utils/plots/boxplots.png
-
 import argparse
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -19,7 +13,7 @@ def define_argparser():
     p = argparse.ArgumentParser()
     
     p.add_argument('--input_path', required=True)
-    p.add_argument('--data_type', type=str, nargs="+", required=True)
+    p.add_argument('--data_type', type=str, nargs="+", required=True)                # nargs="+" option : get at least one argument.
     p.add_argument('--save_dir', type=str, default="dps_utils/plots/boxplots.png")
     
     config = p.parse_args()
@@ -53,7 +47,7 @@ def boxplot_of_specific_data_type(data, data_type, save_dir):
     sns.boxplot(x="type", y="length", data=data_of_specific_type)
     plt.gcf().set_size_inches(15, 15)
     
-    output_path = os.path.join(save_dir.split('/')[0], save_dir.split('/')[1])   # dps_utils/plots
+    output_path = os.path.join(save_dir.split('/')[0], save_dir.split('/')[1])
     os.makedirs(output_path, exist_ok=True)
     plt.savefig(save_dir)
 

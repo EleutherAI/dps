@@ -1,7 +1,3 @@
-# $ python dps_utils/get_data_length_stat.py 
-# --input_path=dps_utils/ko_multi_lang_train_sample.xlsx 
-# --output_path=dps_utils/data_statistics_based_on_character_length.xlsx
-
 import argparse
 import numpy as np
 import pandas as pd

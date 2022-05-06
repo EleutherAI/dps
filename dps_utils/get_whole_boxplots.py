@@ -1,9 +1,3 @@
-# $ python dps_utils/get_whole_boxplots.py 
-# --input_path=dps_utils/ko_multi_lang_train_sample.xlsx
-# --input_stats_path=dps_utils/data_statistics.xlsx
-
-# --max_plot_counts=6
-
 import argparse
 import pandas as pd
 import matplotlib.pyplot as plt
