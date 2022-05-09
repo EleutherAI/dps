@@ -10,7 +10,7 @@ def remove_url(input_text: str) -> str:
 
 def remove_html_tags(text):
     soup = BeautifulSoup(text, "html.parser")
-    return soup.get_text(separator=" ")
+    return soup.get_text(separator=" ").strip()
 
 
 def remove_whitespace(input_text: str, remove_duplicate_whitespace: bool = True) -> str:
