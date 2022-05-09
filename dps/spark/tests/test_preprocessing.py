@@ -1,4 +1,8 @@
-from dps.spark.utils.common_preprocess import *
+from dps.spark.utils.common_preprocess import (reduce_emoticon,
+                                               replace_phone_number,
+                                               replace_rrn,
+                                               remove_whitespace,
+                                               remove_html_tags)
 
 
 def test_reduce_emoticon():
@@ -21,6 +25,6 @@ def test_remove_whitespace():
     assert remove_whitespace(text) == "아 오늘 저녁 맛있는거 먹고 싶 다."
 
 
-def test_strip_html_tags():
+def test_remove_html_tags():
     text = "<br> 안녕하세요 좋은 하루 되세요.!<br>"
-    assert strip_html_tags(text) == "안녕하세요 좋은 하루 되세요.!"
+    assert remove_html_tags(text) == "안녕하세요 좋은 하루 되세요.!"
