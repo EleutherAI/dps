@@ -6,8 +6,7 @@ from pyspark.sql import DataFrame
 
 
 from ..spark_session import spark_session
-from ..utils.common_preprocess import (preprocess_text, 
-                                       reduce_emoticon, 
+from ..utils.common_preprocess import (reduce_emoticon, 
                                        replace_rrn, 
                                        remove_whitespace, 
                                        replace_phone_number, 
@@ -35,7 +34,7 @@ def preprocess_text(input_text: str):
 
 
 def preprocess(input_dir: str, output_dir: str, n_dist: int=10, n_output: int=10):
-    if not os.path.isdir(path):
+    if not os.path.isdir(input_dir):
         raise ValueError('input_dir is not directory path')
     
     with spark_session(f'common_preprocess_jsonl_{input_dir}') as spark:
