@@ -11,7 +11,7 @@ from ..utils.common_preprocess import (preprocess_text,
                                        replace_rrn, 
                                        remove_whitespace, 
                                        replace_phone_number, 
-                                       strip_html_tags)
+                                       remove_html_tags)
 from ..utils.io import to_json
 
 
@@ -21,7 +21,7 @@ def preprocess_text(input_text: str):
                                 replace_phone_number,
                                 replace_rrn,                                    
                                 remove_whitespace,
-                                strip_html_tags]
+                                remove_html_tags]
     
     for func in processing_function_list:
         input_text = func(input_text)
