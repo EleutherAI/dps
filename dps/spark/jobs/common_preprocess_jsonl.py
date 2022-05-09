@@ -1,35 +1,43 @@
-import fire
-import yaml
+import os
 
 from pyspark import SparkContext
 from pyspark.rdd import RDD
-from pyspark.sql import DataFrame, Row
+from pyspark.sql import DataFrame
+
 
 from ..spark_session import spark_session
-from ..utils.common_preprocess import preprocess_text, reduce_emoticon, replace_rrn, remove_whitespace, replace_phone_number, strip_html_tags
+from ..utils.common_preprocess import (preprocess_text, 
+                                       reduce_emoticon, 
+                                       replace_rrn, 
+                                       remove_whitespace, 
+                                       replace_phone_number, 
+                                       strip_html_tags)
 from ..utils.io import to_json
 
 
-def preprocess_text(input_text: str, processing_function_list):
-    if processing_function_list is None:
-        processing_function_list = [reduce_emoticon,
-                                    replace_phone_number,
-                                    replace_rrn,                                    
-                                    remove_whitespace,
-                                    strip_html_tags
-                                    ]
+def preprocess_text(input_text: str):
+
+    processing_function_list = [reduce_emoticon,
+                                replace_phone_number,
+                                replace_rrn,                                    
+                                remove_whitespace,
+                                strip_html_tags]
+    
     for func in processing_function_list:
         input_text = func(input_text)
+
     if isinstance(input_text, str):
         processed_text = input_text
     else:
         processed_text = ' '.join(input_text)
+        
     return processed_text
 
 
 def preprocess(input_dir: str, output_dir: str, n_dist: int=10, n_output: int=10):
-    # todo 
-    # Is input_dir file or directory
+    if not os.path.isdir(path):
+        raise ValueError('input_dir is not directory path')
+    
     with spark_session(f'common_preprocess_jsonl_{input_dir}') as spark:
         sc: SparkContext = spark.sparkContext
         proc_df: DataFrame = spark.read.json(input_dir).repartition(n_dist) \
