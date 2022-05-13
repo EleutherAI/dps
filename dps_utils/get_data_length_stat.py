@@ -26,30 +26,36 @@ def data_stats_to_excel(config):
     """
     
     # load data file
-    DATA_PATH = config.input_path
-    data = pd.read_excel(DATA_PATH, sheet_name='sample_data_cases', index_col=0)
+    data = pd.read_excel(config.input_path, sheet_name='sample_data_cases', index_col=0)
     
     # make output file
     df = pd.DataFrame(index=data.type.unique(),
-                      columns=["nums", "min", "max", "mean", "median", "percentile_1", "percentile_3", "std", "qmarks", "fullstop", "alphabet_first", "numbers"])
+                      columns=["nums", "min", "max", "mean", "median", "percentile_25", "percentile_75", "std", "qmarks", "fullstop", "alphabet_first", "numbers"])
     
-    for idx, type in enumerate(data.type.unique()):
-        each_type = data[data['type'] == type]
-        each_type_length = each_type['text'].apply(str).apply(len)
-        df.iloc[idx, 0] = len(each_type_length)                           # nums
-        df.iloc[idx, 1] = np.min(each_type_length)                        # min
-        df.iloc[idx, 2] = np.max(each_type_length)                        # max
-        df.iloc[idx, 3] = round(np.mean(each_type_length), 2)             # mean
-        df.iloc[idx, 4] = round(np.median(each_type_length), 2)           # median
-        df.iloc[idx, 5] = round(np.percentile(each_type_length, 25), 2)   # percentile_1
-        df.iloc[idx, 6] = round(np.percentile(each_type_length, 75), 2)   # percentile_3
-        df.iloc[idx, 7] = round(np.std(each_type_length), 2)              # std
-        df.iloc[idx, 8] = round(np.mean(each_type['text'].apply(str).apply(lambda x: '?' in x)), 4)                        # qmarks
-        df.iloc[idx, 9] = round(np.mean(each_type['text'].apply(str).apply(lambda x: '.' in x)), 4)                        # fullstop
-        df.iloc[idx, 10] = round(np.mean(each_type['text'].apply(str).apply(lambda x: x[0].encode().isalpha())), 4)        # alphabet_first
-        df.iloc[idx, 11] = round(np.mean(each_type['text'].apply(str).apply(lambda x: max([y.isdigit() for y in x]))), 4)  # numbers
+    for type_name, type_data in data.groupby(['type']):
+        type_data['text'] = type_data['text'].apply(str)
+        each_type_length = type_data['text'].apply(len)
+        
+        nb_data = len(each_type_length)
+        
+        min_length = np.min(each_type_length)
+        max_length = np.max(each_type_length)
+        mean_length = round(np.mean(each_type_length), 2)
+        median_length = round(np.median(each_type_length), 2)
+        percentile_25_length = round(np.percentile(each_type_length, 25), 2)
+        percentile_75_length = round(np.percentile(each_type_length, 75), 2)
+        std_of_length = round(np.std(each_type_length), 2)
+        
+        percentage_of_qmarks = round(np.mean(type_data['text'].apply(lambda x: '?' in x)), 4)
+        percentage_of_fullstop = round(np.mean(type_data['text'].apply(lambda x: '.' in x)), 4)
+        percentage_of_alphabet_first = round(np.mean(type_data['text'].apply(lambda x: x[0].encode().isalpha())), 4)
+        percentage_of_numbers = round(np.mean(type_data['text'].apply(lambda x: max([y.isdigit() for y in x]))), 4)
+        
+        df.loc[type_name, :] = nb_data, \
+            min_length, max_length, mean_length, median_length, percentile_25_length, percentile_75_length, std_of_length, \
+            percentage_of_qmarks, percentage_of_fullstop, percentage_of_alphabet_first, percentage_of_numbers
     
-    return df.to_excel(config.output_path)
+    df.to_excel(config.output_path)
 
 if __name__ == "__main__":
     config = define_argparser()
