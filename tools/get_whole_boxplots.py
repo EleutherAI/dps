@@ -15,7 +15,7 @@ def define_argparser():
     p = argparse.ArgumentParser()
     
     p.add_argument('--input_path', required=True)
-    p.add_argument('--max_plot_counts', type=int, default=8)
+    p.add_argument('--max_plot_counts', type=int, default=10)
     
     config = p.parse_args()
     

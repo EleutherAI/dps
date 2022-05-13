@@ -14,7 +14,7 @@ def define_argparser():
     
     p.add_argument('--input_path', required=True)
     p.add_argument('--data_type', type=str, nargs="+", required=True)                # nargs="+" option : get at least one argument.
-    p.add_argument('--save_dir', type=str, default="dps_utils/plots/boxplots.png")
+    p.add_argument('--save_dir', type=str, default="tools/plots/boxplots.png")
     
     config = p.parse_args()
     
@@ -25,7 +25,7 @@ def boxplot_of_specific_data_type(data, data_type, save_dir):
     Args:
         data : train dataset for gpt.
         data_type : specify which data type included in boxplot.
-        save_dir : specify the output file name. Defaults to "dps_utils/plots/boxplots.png".
+        save_dir : specify the output file name. Defaults to "tools/plots/boxplots.png".
     
     Returns:
         a boxplot image for data length distribution of specific data type.
@@ -45,7 +45,13 @@ def boxplot_of_specific_data_type(data, data_type, save_dir):
     
     plt.figure()
     sns.boxplot(x="type", y="length", data=data_of_specific_type)
-    plt.gcf().set_size_inches(15, 15)
+    plt.gcf().set_size_inches(20, 20)
+    plt.xticks(
+        rotation=40,
+        horizontalalignment='right',
+        fontweight='light',
+        fontsize='x-large'
+    )
     
     output_path = os.path.join(save_dir.split('/')[0], save_dir.split('/')[1])
     os.makedirs(output_path, exist_ok=True)
@@ -54,8 +60,7 @@ def boxplot_of_specific_data_type(data, data_type, save_dir):
 if __name__ == "__main__":
     config = define_argparser()
     
-    DATA_PATH = config.input_path
-    data = pd.read_excel(DATA_PATH, sheet_name='sample_data_cases', index_col=0)
+    data = pd.read_excel(config.input_path, sheet_name='sample_data_cases', index_col=0)
     data_type = config.data_type
     save_dir = config.save_dir
     
