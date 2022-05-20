@@ -1,16 +1,15 @@
 import argparse
+from pathlib import Path
 import numpy as np
 import pandas as pd
 
 def define_argparser():
-    p = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser()
     
-    p.add_argument('--input_path', required=True)
-    p.add_argument('--output_path', required=True)
+    parser.add_argument('--input_path', type=Path, required=True)
+    parser.add_argument('--output_path', type=Path, required=True)
     
-    config = p.parse_args()
-    
-    return config
+    return parser.parse_args()
 
 def data_stats_to_excel(config):
     """
@@ -20,13 +19,13 @@ def data_stats_to_excel(config):
         --output_path : the path of data length statistics output.
 
     Returns:
-        data length statistics excel file : 
+        data length statistics excel file (.xlsx) : 
             It includes various length statistics.
-            The row takes name of data types and the columns takes type of statistics.
+            The rows take name of data types and the columns take type of statistics.
     """
     
     # load data file
-    data = pd.read_excel(config.input_path, sheet_name='sample_data_cases', index_col=0)
+    data = pd.read_excel(config.input_path, index_col=0)
     
     # make output file
     df = pd.DataFrame(index=data.type.unique(),
