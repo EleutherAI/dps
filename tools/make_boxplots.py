@@ -41,31 +41,32 @@ def make_boxplots(input_file_name, output_path, max_split_cnts=10, data_type=Non
     
     if data_type == None:
         max_length_per_type = {}
+        length_df = pd.DataFrame(columns=['length', 'type'])
+        
         for type_name, type_data in data.groupby(['type']):
+            each_length_df = pd.DataFrame(columns=['length', 'type'])
             if tokenize == 'word':
-                each_type_length = type_data['text'].apply(lambda x: len(x.split(' ')))
+                each_length_df['length'] = type_data['text'].apply(lambda x: len(x.split(' ')))
             else:
-                each_type_length = type_data['text'].apply(len)
+                each_length_df['length'] = type_data['text'].apply(len)
+            each_length_df['type'] = type_name
 
-            max_length_per_type[type_name] = np.max(each_type_length)
+            max_length_per_type[type_name] = np.max(each_length_df.length)
+            length_df = pd.concat([length_df, each_length_df])
+        
+        length_df.reset_index(drop=True, inplace=True)
         max_length_per_type = sorted(max_length_per_type.items(), key=lambda x:x[1], reverse=True)
         max_length_per_type = [t[0] for t in max_length_per_type]
         
         iteration = len(max_length_per_type) // max_split_cnts + 1
         for i in range(iteration):
             clip_index = max_length_per_type[i * max_split_cnts:(i + 1) * max_split_cnts]
+            data_of_specific_type = pd.DataFrame(columns=['length', 'type'])
             
-            data_of_specific_type = pd.DataFrame(columns=['text', 'type'])
             for t in clip_index:
-                clip = data[data['type'] == t]
+                clip = length_df[length_df['type'] == t]
                 data_of_specific_type = pd.concat([data_of_specific_type, clip])
-            
             data_of_specific_type.reset_index(drop=True, inplace=True)
-            if tokenize == 'word':
-                data_of_specific_type['text'] = data_of_specific_type['text'].apply(lambda x: len(x.split(' ')))
-            else:
-                data_of_specific_type['text'] = data_of_specific_type['text'].apply(len)
-            data_of_specific_type.columns = ['length', 'type']
             
             plt.figure()
             sns.boxplot(x="type", y="length", data=data_of_specific_type)
