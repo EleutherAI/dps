@@ -17,17 +17,19 @@ def get_args():
     parser.add_argument("--input_file_name", type=Path, required=True)
     parser.add_argument("--output_path", type=Path, required=True)
     parser.add_argument("--max_split_cnts", type=int, default=10)
-    parser.add_argument("--data_type", nargs="*")
+    parser.add_argument("--data_type", type=str, nargs="*")
+    parser.add_argument('--tokenize', type=str, choices=['character', 'word'], default="word")
     
     return parser.parse_args()
 
-def make_boxplots(input_file_name, output_path, max_split_cnts=10, data_type=None):
+def make_boxplots(input_file_name, output_path, max_split_cnts=10, data_type=None, tokenize='word'):
     """
     Args:
         input_file_name (str): specify the filename of dataset.
         output_path (str): specify the output path.
         max_split_cnts (int, optional): specify how many data types will be included in each boxplot image. Defaults to 10.
         data_type (list, optional): specify which data type will be included in boxplot. Defaults to None.
+        tokenize (str, optional): choose tokenizing options from ('character', 'word'). Defaults to 'word'.
            
     Returns:
         When user doesn't feed data type, boxplot images for data length distribution of whole data types in dataset will be created.
@@ -35,11 +37,16 @@ def make_boxplots(input_file_name, output_path, max_split_cnts=10, data_type=Non
     """
     
     data = pd.read_excel(input_file_name, index_col=0)
+    data['text'] = data['text'].apply(str)
     
     if data_type == None:
         max_length_per_type = {}
         for type_name, type_data in data.groupby(['type']):
-            each_type_length = type_data['text'].apply(str).apply(len)
+            if tokenize == 'word':
+                each_type_length = type_data['text'].apply(lambda x: len(x.split(' ')))
+            else:
+                each_type_length = type_data['text'].apply(len)
+
             max_length_per_type[type_name] = np.max(each_type_length)
         max_length_per_type = sorted(max_length_per_type.items(), key=lambda x:x[1], reverse=True)
         max_length_per_type = [t[0] for t in max_length_per_type]
@@ -54,7 +61,10 @@ def make_boxplots(input_file_name, output_path, max_split_cnts=10, data_type=Non
                 data_of_specific_type = pd.concat([data_of_specific_type, clip])
             
             data_of_specific_type.reset_index(drop=True, inplace=True)
-            data_of_specific_type['text'] = data_of_specific_type['text'].apply(str).apply(len)
+            if tokenize == 'word':
+                data_of_specific_type['text'] = data_of_specific_type['text'].apply(lambda x: len(x.split(' ')))
+            else:
+                data_of_specific_type['text'] = data_of_specific_type['text'].apply(len)
             data_of_specific_type.columns = ['length', 'type']
             
             plt.figure()
@@ -68,7 +78,7 @@ def make_boxplots(input_file_name, output_path, max_split_cnts=10, data_type=Non
             )
             
             os.makedirs(output_path, exist_ok=True)
-            plt.savefig(f"{output_path}/boxplots_for_whole_data_type_split_by_{max_split_cnts}_{i + 1}.png")
+            plt.savefig(f"{output_path}/boxplots_for_all_split_by_{max_split_cnts}_{i + 1}_tokenized_by_{tokenize}_level.png")
             
     else:
         data_of_specific_type = pd.DataFrame(columns=['text', 'type'])
@@ -77,7 +87,10 @@ def make_boxplots(input_file_name, output_path, max_split_cnts=10, data_type=Non
             data_of_specific_type = pd.concat([data_of_specific_type, clip])
         
         data_of_specific_type.reset_index(drop=True, inplace=True)
-        data_of_specific_type['text'] = data_of_specific_type['text'].apply(str).apply(len)
+        if tokenize == 'word':
+            data_of_specific_type['text'] = data_of_specific_type['text'].apply(lambda x: len(x.split(' ')))
+        else:
+            data_of_specific_type['text'] = data_of_specific_type['text'].apply(len)
         data_of_specific_type.columns = ['length', 'type']
         
         plt.figure()
@@ -91,12 +104,12 @@ def make_boxplots(input_file_name, output_path, max_split_cnts=10, data_type=Non
         )
         
         os.makedirs(output_path, exist_ok=True)
-        plt.savefig(f"{output_path}/boxplots_for_{' '.join([i for i in data_type])}.png")
+        plt.savefig(f"{output_path}/boxplots_for_{' '.join([i for i in data_type])}_tokenized_by_{tokenize}_level.png")
 
 if __name__ == "__main__":
     config = get_args()
 
     if config.data_type != None:
-        make_boxplots(config.input_file_name, config.output_path, data_type=config.data_type)
+        make_boxplots(config.input_file_name, config.output_path, data_type=config.data_type, tokenize=config.tokenize)
     else:
-        make_boxplots(config.input_file_name, config.output_path, max_split_cnts=config.max_split_cnts)
+        make_boxplots(config.input_file_name, config.output_path, max_split_cnts=config.max_split_cnts, tokenize=config.tokenize)
