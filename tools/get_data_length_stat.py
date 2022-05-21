@@ -8,6 +8,7 @@ def define_argparser():
     
     parser.add_argument('--input_path', type=Path, required=True)
     parser.add_argument('--output_path', type=Path, required=True)
+    parser.add_argument('--tokenize', type=str, choices=['character', 'word'], default="word")
     
     return parser.parse_args()
 
@@ -15,8 +16,9 @@ def data_stats_to_excel(config):
     """
     Args:
         config : 
-        --input_path : the path of train dataset for gpt.
-        --output_path : the path of data length statistics output.
+        --input_path (str): the path of train dataset for gpt.
+        --output_path (str): the path of data length statistics output.
+        --tokenize (str, optional): choose tokenizing options from ('character', 'word'). Defaults to 'word'.
 
     Returns:
         data length statistics excel file (.xlsx) : 
@@ -33,7 +35,10 @@ def data_stats_to_excel(config):
     
     for type_name, type_data in data.groupby(['type']):
         type_data['text'] = type_data['text'].apply(str)
-        each_type_length = type_data['text'].apply(len)
+        if config.tokenize == 'word':
+            each_type_length = type_data['text'].apply(lambda x: len(x.split(' ')))
+        else:
+            each_type_length = type_data['text'].apply(len)
         
         nb_data = len(each_type_length)
         
