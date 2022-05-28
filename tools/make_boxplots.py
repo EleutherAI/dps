@@ -19,23 +19,22 @@ def get_args():
     
     parser.add_argument("--data_type", type=str, nargs="*")
     parser.add_argument("--max_split_cnts", type=int, default=10)
-    parser.add_argument('--tokenize', type=str, choices=['character', 'word'], default="word")
+    parser.add_argument('--tokenizer', type=str, choices=['character', 'word'], default="word")
     
     return parser.parse_args()
 
-def make_boxplots(data, data_type, output_path, max_split_cnts=10, tokenize='word'):
+def make_boxplots(data, data_type, output_path, max_split_cnts=10, tokenizer='word'):
     """
-    Args:
-        input_file_name (str): specify the filename of dataset.
-        output_path (str): specify the output path.
+    When user doesn't feed data types (data sources of text in dataset), boxplot images for data length distribution of whole data types in dataset will be created.
+    Otherwise, boxplot images for data length distribution of specific data types will be created.
         
-        data_type (list, optional): specify which data type will be included in boxplot. Defaults to None.
+    Args:
+        input_file_name (str): specify the path and filename of dataset to analyse.
+        output_path (str): specify the directory path where you save the output boxplot images. The filename of boxplot images will be created automatically.
+        
+        data_type (list, optional): specify which data type will be included in boxplot. Defaults to all data types in dataset.
         max_split_cnts (int, optional): specify how many data types will be included in each boxplot image. Defaults to 10.
-        tokenize (str, optional): choose tokenizing options from ('character', 'word'). Defaults to 'word'.
-           
-    Returns:
-        When user doesn't feed data type, boxplot images for data length distribution of whole data types in dataset will be created.
-        Otherwise, a boxplot image for data length distribution of specific data type will be created.
+        tokenizer (str, optional): choose tokenizer options from ('character', 'word'). Defaults to 'word'.
     """
 
     max_length_per_type = {}
@@ -43,7 +42,7 @@ def make_boxplots(data, data_type, output_path, max_split_cnts=10, tokenize='wor
     
     for each_type in data_type:
         each_type_data = data[data['type'] == each_type]
-        if tokenize == "word":
+        if tokenizer == "word":
             each_type_data['length'] = each_type_data['text'].apply(lambda x: len(x.split(' ')))
         else:
             each_type_data['length'] = each_type_data['text'].apply(len)
@@ -76,7 +75,7 @@ def make_boxplots(data, data_type, output_path, max_split_cnts=10, tokenize='wor
         )
         
         os.makedirs(output_path, exist_ok=True)
-        plt.savefig(f"{output_path}/boxplots_about_{number_of_data_type}_number_of_data_type_split_by_{max_split_cnts}_{i + 1}th_tokenized_by_{tokenize}_level.png")
+        plt.savefig(f"{output_path}/boxplots_about_{number_of_data_type}_number_of_data_type_split_by_{max_split_cnts}_{i + 1}th_tokenized_by_{tokenizer}_level.png")
 
 if __name__ == "__main__":
     config = get_args()
@@ -85,6 +84,6 @@ if __name__ == "__main__":
     data['text'] = data['text'].apply(str)
     
     if config.data_type == None:
-        make_boxplots(data, data['type'].unique(), config.output_path, max_split_cnts=config.max_split_cnts, tokenize=config.tokenize)
+        make_boxplots(data, data['type'].unique(), config.output_path, max_split_cnts=config.max_split_cnts, tokenizer=config.tokenizer)
     else:
-        make_boxplots(data, config.data_type, config.output_path, max_split_cnts=config.max_split_cnts, tokenize=config.tokenize)
+        make_boxplots(data, config.data_type, config.output_path, max_split_cnts=config.max_split_cnts, tokenizer=config.tokenizer)
