@@ -1,0 +1,33 @@
+base_dir: './datasets/test_sample_jsonl_data'
+targets:
+    - 0
+    - 1
+    - 2
+    - 3
+output_dir: './datasets/massivetext_output'
+
+# Filters & Parameters
+doc_len_filter:
+    min : 50
+    max : 100000
+mean_word_len_filter:
+    min : 3
+    max : 10
+symbol_to_word_ratio_filter:
+    ratio : 0.01
+bullet_ellipsis_filter:
+    bullet_point_ratio : 0.9
+    ellipsis_ratio : 0.3
+alphabetic_word_ratio_filter:
+    ratio : 0.8
+least_k_essential_words_filter:
+    k : 2
+    word_list :
+        - 'the'
+        - 'be'
+        - 'to'
+        - 'of'
+        - 'and'
+        - 'that'
+        - 'have'
+        - 'with'
