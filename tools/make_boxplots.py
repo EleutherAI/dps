@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 import seaborn as sns
 import os
+import warnings
+warnings.filterwarnings(action='ignore')
 
 # set to show korean data type in boxplot
 rc('font', family='AppleGothic')
@@ -68,7 +70,10 @@ def make_boxplots(data, data_type, output_path, max_split_cnts=10, tokenizer='wo
     max_length_per_type = {}
     data_of_specific_type = pd.DataFrame(columns=['text', 'type', 'length'])
     
+    all_data_types = data['type'].unique()
     for each_type in data_type:
+        assert each_type in all_data_types, "please feed data type that is source of text data precisely"
+        
         each_type_data = data[data['type'] == each_type]
         each_type_data['length'] = apply_tokenizer(each_type_data['text'], tokenizer)
         
