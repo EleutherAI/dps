@@ -13,7 +13,7 @@ warnings.filterwarnings(action='ignore')
 rc('font', family='AppleGothic')
 plt.rcParams['axes.unicode_minus'] = False
 
-def get_args():
+def get_args() -> argparse.Namespace:
     """
     Get specific arguments which user feeds when run `make_boxplots.py`
 
@@ -40,13 +40,13 @@ def get_args():
     
     return parser.parse_args()
 
-def apply_tokenizer(text_data_of_each_type, tokenizer):
+def apply_tokenizer(text_data_of_each_type: pd.Series, tokenizer: str) -> pd.Series:
     if tokenizer == 'word':
         return text_data_of_each_type.apply(lambda x: len(x.split(' ')))
     else:
         return text_data_of_each_type.apply(lambda x: x.replace(' ', '')).apply(len)
 
-def make_boxplots(data, data_type, output_path, max_split_cnts=10, tokenizer='word'):
+def make_boxplots(data: pd.DataFrame, data_type: list, output_path: Path, max_split_cnts: int = 10, tokenizer: str = 'word') -> None:
     """
     This takes text data and source of that data, called "data type" (ex. nsmc, kowiki, naver_blog_post, etc.), as an input,
     and makes boxplot images to investigate text length distribution by each data type as an output.
@@ -114,6 +114,6 @@ if __name__ == "__main__":
     data['text'] = data['text'].apply(str)
     
     if config.data_type == None:
-        make_boxplots(data, data['type'].unique(), config.output_path, max_split_cnts=config.max_split_cnts, tokenizer=config.tokenizer)
+        make_boxplots(data, list(data['type'].unique()), config.output_path, max_split_cnts=config.max_split_cnts, tokenizer=config.tokenizer)
     else:
         make_boxplots(data, config.data_type, config.output_path, max_split_cnts=config.max_split_cnts, tokenizer=config.tokenizer)

@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-def define_argparser():
+def define_argparser() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     
     parser.add_argument('--input_path', type=Path, required=True)
@@ -12,13 +12,13 @@ def define_argparser():
     
     return parser.parse_args()
 
-def apply_tokenizer(each_type_data, tokenizer):
+def apply_tokenizer(each_type_data: pd.Series, tokenizer: str) -> pd.Series:
     if tokenizer == 'word':
         return each_type_data.apply(lambda x: len(x.split(' ')))
     else:
         return each_type_data.apply(lambda x: x.replace(' ', '')).apply(len)
 
-def data_stats_to_excel(input_path, output_path, tokenizer):
+def data_stats_to_excel(input_path: Path, output_path: Path, tokenizer: str) -> None:
     """
     This takes text data and source of that data, called "data type" (ex. nsmc, kowiki, naver_blog_post, etc.), as an input,
     and makes a length statistics excel file (.xlsx) that includes various types of statistics as an output.
