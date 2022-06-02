@@ -2,7 +2,9 @@ from dps.spark.utils.common_preprocess import (reduce_emoticon,
                                                replace_phone_number,
                                                replace_rrn,
                                                remove_whitespace,
-                                               remove_html_tags)
+                                               remove_html_tags,
+                                               replace_creditcard,
+                                               replace_bank_account)
 
 
 def test_reduce_emoticon():
@@ -28,3 +30,14 @@ def test_remove_whitespace():
 def test_remove_html_tags():
     text = "<br> 안녕하세요 좋은 하루 되세요.!<br>"
     assert remove_html_tags(text) == "안녕하세요 좋은 하루 되세요.!"
+
+
+def test_replace_creditcard():
+    text = "제 카드번호는 신한카드 6011-1234-5678-9012입니다."
+    assert replace_creditcard(text) == "제 카드번호는 신한카드 <|crd|>입니다."
+
+
+def test_replace_bank_account():
+    text = "제 통장으로 입금해주세요. 계좌번호는 110-274-742823 신한입니다."
+    assert replace_bank_account(text) == "제 통장으로 입금해주세요. 계좌번호는 <|acc|> 신한입니다."
+    
