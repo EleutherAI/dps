@@ -35,9 +35,9 @@ def data_stats_to_excel(input_path: Path, output_path: Path, tokenizer: str) -> 
     - standard deviation of length
     
     Args:
-        input_path (str): specify the path and filename of dataset to analyse.
-        output_path (str): specify the path and filename for data length statistics output.
-        tokenizer (str, optional): choose tokenizer options from ('character', 'word'). Defaults to 'word'.
+        input_path (str): the path and filename of dataset to analyse.
+        output_path (str): the path and filename for data length statistics output.
+        tokenizer (str, optional): tokenizer options from ('character', 'word'). Defaults to 'word'.
     """
     
     # load data
