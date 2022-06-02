@@ -12,6 +12,12 @@ def define_argparser():
     
     return parser.parse_args()
 
+def apply_tokenizer(each_type_data, tokenizer):
+    if tokenizer == 'word':
+        return each_type_data.apply(lambda x: len(x.split(' ')))
+    else:
+        return each_type_data.apply(lambda x: x.replace(' ', '')).apply(len)
+
 def data_stats_to_excel(input_path, output_path, tokenizer):
     """
     This takes text data and source of that data, called "data type" (ex. nsmc, kowiki, naver_blog_post, etc.), as an input,
@@ -44,13 +50,9 @@ def data_stats_to_excel(input_path, output_path, tokenizer):
     
     for type_name, type_data in data.groupby(['type']):
         type_data['text'] = type_data['text'].apply(str)
-        if tokenizer == 'word':
-            each_type_length = type_data['text'].apply(lambda x: len(x.split(' ')))
-        else:
-            each_type_length = type_data['text'].apply(lambda x: x.replace(' ', '')).apply(len)
+        each_type_length = apply_tokenizer(type_data['text'], tokenizer)
         
         nb_data = len(each_type_length)
-        
         min_length = np.min(each_type_length)
         max_length = np.max(each_type_length)
         mean_length = round(np.mean(each_type_length), 2)
