@@ -12,9 +12,24 @@ rc('font', family='AppleGothic')
 plt.rcParams['axes.unicode_minus'] = False
 
 def get_args():
+    """
+    Get specific arguments which user feeds when run `make_boxplots.py`
+
+    - input_path (str): specify the path and filename of dataset to analyse.
+    - output_path (str): specify the directory path where you save the output boxplot images. 
+                         The filename of boxplot images will be created automatically given arguments.
+    - data_type (list, optional): specify which data type will be included in boxplot.
+                                  Data type means source of each text data (ex. nsmc, kowiki, naver_blog_post, etc.).
+                                  Defaults to all data types in dataset.
+    - max_split_cnts (int, optional): specify how many data types will be split and included in each boxplot image. 
+                                      Data type means source of each text data (ex. nsmc, kowiki, naver_blog_post, etc.).
+                                      Defaults to 10.
+    - tokenizer (str, optional): choose tokenizer options from ('character', 'word'). Defaults to 'word'.
+    """
+    
     parser = argparse.ArgumentParser()
     
-    parser.add_argument("--input_file_name", type=Path, required=True)
+    parser.add_argument("--input_path", type=Path, required=True)
     parser.add_argument("--output_path", type=Path, required=True)
     
     parser.add_argument("--data_type", type=str, nargs="*")
@@ -23,18 +38,31 @@ def get_args():
     
     return parser.parse_args()
 
+def apply_tokenizer(text_data_of_each_type, tokenizer):
+    if tokenizer == 'word':
+        return text_data_of_each_type.apply(lambda x: len(x.split(' ')))
+    else:
+        return text_data_of_each_type.apply(lambda x: x.replace(' ', '')).apply(len)
+
 def make_boxplots(data, data_type, output_path, max_split_cnts=10, tokenizer='word'):
     """
-    When user doesn't feed data types (data sources of text in dataset), boxplot images for data length distribution of whole data types in dataset will be created.
-    Otherwise, boxplot images for data length distribution of specific data types will be created.
+    This takes text data and source of that data, called "data type" (ex. nsmc, kowiki, naver_blog_post, etc.), as an input,
+    and makes boxplot images to investigate text length distribution by each data type as an output.
+    
+    The x-axis of boxplot is source of text data (data type) and the y-axis is length split by tokenizer option.
+
+    When user doesn't feed data type (source of text data), whole data types in dataset will be included.
+    Otherwise, specific data types will be included.
         
     Args:
-        input_file_name (str): specify the path and filename of dataset to analyse.
-        output_path (str): specify the directory path where you save the output boxplot images. The filename of boxplot images will be created automatically.
-        
-        data_type (list, optional): specify which data type will be included in boxplot. Defaults to all data types in dataset.
-        max_split_cnts (int, optional): specify how many data types will be included in each boxplot image. Defaults to 10.
-        tokenizer (str, optional): choose tokenizer options from ('character', 'word'). Defaults to 'word'.
+        data (str): excel dataset which contains text data and source of that data which is called "data type".
+        data_type (list): source of text data that will be included in boxplot along user's input.
+        output_path (str): directory path where output boxplot images will be saved.
+                           The filename of boxplot images will be created automatically given arguments.
+        max_split_cnts (int, optional): how many data types will be split and included in each boxplot image. 
+                                        Defaults to 10.
+        tokenizer (str, optional): tokenizer options from ('character', 'word'). 
+                                   Defaults to 'word'.
     """
 
     max_length_per_type = {}
@@ -42,10 +70,7 @@ def make_boxplots(data, data_type, output_path, max_split_cnts=10, tokenizer='wo
     
     for each_type in data_type:
         each_type_data = data[data['type'] == each_type]
-        if tokenizer == "word":
-            each_type_data['length'] = each_type_data['text'].apply(lambda x: len(x.split(' ')))
-        else:
-            each_type_data['length'] = each_type_data['text'].apply(len)
+        each_type_data['length'] = apply_tokenizer(each_type_data['text'], tokenizer)
         
         max_length_per_type[each_type] = max(each_type_data['length'])
         data_of_specific_type = pd.concat([data_of_specific_type, each_type_data])
@@ -80,7 +105,7 @@ def make_boxplots(data, data_type, output_path, max_split_cnts=10, tokenizer='wo
 if __name__ == "__main__":
     config = get_args()
 
-    data = pd.read_excel(config.input_file_name, index_col=0)
+    data = pd.read_excel(config.input_path, index_col=0)
     data['text'] = data['text'].apply(str)
     
     if config.data_type == None:
