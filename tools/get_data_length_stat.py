@@ -12,33 +12,42 @@ def define_argparser():
     
     return parser.parse_args()
 
-def data_stats_to_excel(config):
+def data_stats_to_excel(input_path, output_path, tokenizer):
     """
+    This takes text data and source of that data, called "data type" (ex. nsmc, kowiki, naver_blog_post, etc.), as an input,
+    and makes a length statistics excel file (.xlsx) that includes various types of statistics as an output.
+    
+    The rows of output file take source of text data (data type) and the columns take types of statistics.
+    The types of statistics mean values listed below in specific data type.
+    - number of data
+    - minimum length
+    - maximum length
+    - mean of length
+    - median of length
+    - 25th percentile of length
+    - 75th percentile of length
+    - standard deviation of length
+    
     Args:
-        config : 
-        --input_path (str): specify the path and filename of dataset to analyse.
-        --output_path (str): specify the path and filename for data length statistics output.
-        --tokenizer (str, optional): choose tokenizer options from ('character', 'word'). Defaults to 'word'.
-
-    Returns:
-        data length statistics excel file (.xlsx) : 
-            It includes various length statistics.
-            The rows take name of data types (data sources) and the columns take type of statistics.
+        input_path (str): specify the path and filename of dataset to analyse.
+        output_path (str): specify the path and filename for data length statistics output.
+        tokenizer (str, optional): choose tokenizer options from ('character', 'word'). Defaults to 'word'.
     """
     
     # load data
-    data = pd.read_excel(config.input_path, index_col=0)
+    data = pd.read_excel(input_path, index_col=0)
     
     # make output
     df = pd.DataFrame(index=data.type.unique(),
-                      columns=["nums", "min", "max", "mean", "median", "percentile_25", "percentile_75", "std"])
+                      columns=["nums", "min", "max", "mean", "median", 
+                               "percentile_25", "percentile_75", "std"])
     
     for type_name, type_data in data.groupby(['type']):
         type_data['text'] = type_data['text'].apply(str)
-        if config.tokenizer == 'word':
+        if tokenizer == 'word':
             each_type_length = type_data['text'].apply(lambda x: len(x.split(' ')))
         else:
-            each_type_length = type_data['text'].apply(len)
+            each_type_length = type_data['text'].apply(lambda x: x.replace(' ', '')).apply(len)
         
         nb_data = len(each_type_length)
         
@@ -50,10 +59,11 @@ def data_stats_to_excel(config):
         percentile_75_length = round(np.percentile(each_type_length, 75), 2)
         std_of_length = round(np.std(each_type_length), 2)
         
-        df.loc[type_name, :] = nb_data, min_length, max_length, mean_length, median_length, percentile_25_length, percentile_75_length, std_of_length
+        df.loc[type_name, :] = nb_data, min_length, max_length, mean_length, median_length, \
+                                percentile_25_length, percentile_75_length, std_of_length
     
-    df.to_excel(config.output_path)
+    df.to_excel(output_path)
 
 if __name__ == "__main__":
     config = define_argparser()
-    data_stats_to_excel(config)
+    data_stats_to_excel(config.input_path, config.output_path, config.tokenizer)
