@@ -1,17 +1,26 @@
 import argparse
 from pathlib import Path
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib import rc
+import matplotlib.font_manager as fm
 import seaborn as sns
 import os
+import platform
 import warnings
 warnings.filterwarnings(action='ignore')
 
 # set to show korean data type in boxplot
-rc('font', family='AppleGothic')
 plt.rcParams['axes.unicode_minus'] = False
+if platform.system() == "Darwin":
+    plt.rcParams['font.family'] = 'AppleGothic'
+elif platform.system() == "Windows":
+    assert 'NanumGothic' in [font.name for font in fm.fontManager.ttflist], "please install 'NanumGothic' to show korean name of data type"
+    plt.rcParams['font.family'] = 'NanumGothic'
+elif platform.system() == "Linux":
+    assert 'NanumGothic' in [font.name for font in fm.fontManager.ttflist], "please install 'NanumGothic' to show korean name of data type"
+    plt.rcParams["font.family"] = 'NanumGothic'
+else:
+    raise NotImplementedError(f"{platform.system()} is not supported")
 
 def get_args() -> argparse.Namespace:
     """
