@@ -9,6 +9,5 @@ setup(
         'fire==0.3.1',
         'pyyaml',
         'soynlp',
-        'bs4'
     ]
 )
