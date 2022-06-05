@@ -38,6 +38,6 @@ def test_replace_creditcard():
 
 
 def test_replace_bank_account():
-    text = "제 통장으로 입금해주세요. 계좌번호는 110-274-742823 신한입니다."
+    text = "제 통장으로 입금해주세요. 계좌번호는 1111-1274-111111 신한입니다."
     assert replace_bank_account(text) == "제 통장으로 입금해주세요. 계좌번호는 <|acc|> 신한입니다."
     
