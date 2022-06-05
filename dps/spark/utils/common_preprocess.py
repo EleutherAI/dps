@@ -25,7 +25,7 @@ def replace_email(input_text: str) -> str:
 
 
 def replace_phone_number(input_text: str) -> str:
-    regex_pattern = '[0-9]{2,3}-[0-9]{3,4}-[0-9]{4}'    
+    regex_pattern = '([0-9]{2,3}-[0-9]{3,4}-[0-9]{4})|([0-9]{2,3}[0-9]{3,4}[0-9]{4})'
     return re.sub(regex_pattern, '<|tel|>', input_text)
 
 
@@ -40,11 +40,11 @@ def replace_creditcard(input_text: str) -> str:
 
 
 def replace_bank_account(input_text: str) -> str:
-    regex_pattern = "^(\d{1,})(-(\d{1,})){1,}|([0-9]\d{11})|([0-9]\d{12})|([0-9]\d{13})|([0-9]\d{14})|([0-9]{3,4}\\-[0-9]{3,4}\\-[0-9]{5,6})|([0-9]{3}\\-[0-9]{2,4}\\-[0-9]{4,6}\\-[0-9]{1,2})|([0-9]{3}\\-[0-9]{6}\\-[0-9]{2,4}\\-[0-9]{3})"
-    # regex_pattern = re.compile("(\d{2,6}[ -]-?\d{2,6}[ -]-?\d{2,6}[ -]-?\d{2,6})")
+    # regex_pattern = "^(\d{1,})(-(\d{1,})){1,}|([0-9]\d{11})|([0-9]\d{12})|([0-9]\d{13})|([0-9]\d{14})|([0-9]{3,4}\\-[0-9]{3,4}\\-[0-9]{5,6})|([0-9]{3}\\-[0-9]{2,4}\\-[0-9]{4,6}\\-[0-9]{1,2})|([0-9]{3}\\-[0-9]{6}\\-[0-9]{2,4}\\-[0-9]{3})"
     # return re.sub(regex_pattern, '<|acc|>', input_text)
-    # if regex_pattern.search(input_text):
-    return re.sub(regex_pattern, '<|acc|>', input_text)
+    result = "".join(re.findall("\d+",(input_text)))
+    if len(result) > 11:
+        return result.replace(result, "<|acc|>")
 
 
 def reduce_emoticon(text: str, n=2):
@@ -53,8 +53,4 @@ def reduce_emoticon(text: str, n=2):
     ex) ㅋㅋㅋㅋㅋㅋㅋ => ㅋㅋ
     """
     return emoticon_normalize(text, num_repeats=n)
-
-
-if __name__ == "__main__":
-    print(replace_bank_account("제 통장 번호는 110-274-742823입니다."))
     
