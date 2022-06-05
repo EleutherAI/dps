@@ -9,8 +9,8 @@ def remove_url(input_text: str) -> str:
 
 
 def remove_html_tags(text):
-    soup = BeautifulSoup(text, "html.parser")
-    return soup.get_text(separator=" ").strip()
+    clean = re.compile('<.*?>')
+    return re.sub(clean, '', text).strip()
 
 
 def remove_whitespace(input_text: str, remove_duplicate_whitespace: bool = True) -> str:
@@ -40,3 +40,14 @@ def reduce_emoticon(text: str, n=2):
     ex) ㅋㅋㅋㅋㅋㅋㅋ => ㅋㅋ
     """
     return emoticon_normalize(text, num_repeats=n)
+
+
+def replace_credit_number(input_text: str) -> str:
+    regex_pattern = "[0-9]{4}[-\s\.]?[0-9]{4}[-\s\.]?[0-9]{4}[-\s\.]?[0-9]{4}"
+    return re.sub(regex_pattern, '<|crd|>', input_text)
+
+
+def replace_account_number(input_text: str) -> str:
+    regex_pattern = "(\d{1,})(-(\d{1,})){1,}"
+    return re.sub(regex_pattern, '<|acc|>', input_text)
+
