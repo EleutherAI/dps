@@ -1,8 +1,9 @@
-import yaml
+import os
+
 from pyspark import SparkContext
 from pyspark.rdd import RDD
 
-from ..spark_session import spark_session
+from ..spark_session import spark_session, spark_session_for_cluster
 from ..utils.io import read_line, to_json
 from ..utils.massivetext_filter import (doc_len_filter, 
                                         mean_word_len_filter, 
@@ -11,15 +12,19 @@ from ..utils.massivetext_filter import (doc_len_filter,
                                         alphabetic_word_ratio_filter)
 
 
-def massivetext_quality_filtering(input_dir: str, output_dir: str,
-                                  n_dist: int=10, n_output: int=10,
-                                  min_doc_len: int=50, max_doc_len: int=100000,
-                                  min_mean_word_len: int=3, max_mean_word_len: int=10,
-                                  symbol_to_word_ratio: float=0.1,
-                                  bullet_point_ratio: float=0.9, ellipsis_ratio: float=0.3,
-                                  alphabetic_word_ratio: float=0.8):
+def massivetext_filter_jsonl(input_dir: str, output_dir: str,
+                             n_dist: int=10, n_output: int=10, is_cluster=False,
+                             min_doc_len: int=50, max_doc_len: int=100000,
+                             min_mean_word_len: int=3, max_mean_word_len: int=10,
+                             symbol_to_word_ratio: float=0.1,
+                             bullet_point_ratio: float=0.9, ellipsis_ratio: float=0.3,
+                             alphabetic_word_ratio: float=0.8):
 
-    with spark_session("massivetext quality filtering") as spark:
+    if (not is_cluster) and (not os.path.isdir(input_dir)):
+        raise ValueError('input_dir is not directory path')
+    session_fn = spark_session_for_cluster if is_cluster else spark_session
+
+    with session_fn("massivetext quality filter") as spark:
         sc: SparkContext = spark.sparkContext
         proc_rdd: RDD = sc.textFile(input_dir) \
             .repartition(n_dist) \
