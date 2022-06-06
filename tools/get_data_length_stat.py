@@ -12,7 +12,7 @@ def define_argparser() -> argparse.Namespace:
     parser.add_argument('--tokenizer', type=str, default="word", 
                         help="You can choose any tokenizer applied in huggingface model (https://huggingface.co/models) by feeding name of huggingface model. \
                         Otherwise, you can simply use word-based or character-based tokenizer by feeding 'word' or 'character'. Defaults to 'word'.")
-
+    
     return parser.parse_args()
 
 def apply_tokenizer(each_type_data: pd.Series, tokenizer: str) -> pd.Series:
