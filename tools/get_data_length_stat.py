@@ -2,21 +2,28 @@ import argparse
 from pathlib import Path
 import numpy as np
 import pandas as pd
+from transformers import AutoTokenizer
 
 def define_argparser() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     
     parser.add_argument('--input_path', type=Path, required=True)
     parser.add_argument('--output_path', type=Path, required=True)
-    parser.add_argument('--tokenizer', type=str, choices=['character', 'word'], default="word")
+    parser.add_argument('--tokenizer', type=str, default="word", 
+                        help="You can choose any tokenizer applied in huggingface model (https://huggingface.co/models) by feeding name of huggingface model. \
+                        Otherwise, you can simply use word-based or character-based tokenizer by feeding 'word' or 'character'. Defaults to 'word'.")
     
     return parser.parse_args()
 
 def apply_tokenizer(each_type_data: pd.Series, tokenizer: str) -> pd.Series:
     if tokenizer == 'word':
         return each_type_data.apply(lambda x: len(x.split(' ')))
-    else:
+    elif tokenizer == 'character':
         return each_type_data.apply(lambda x: x.replace(' ', '')).apply(len)
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(tokenizer, bos_token='</s>', eos_token='</s>',
+                                                  unk_token='<unk>', pad_token='<pad>', mask_token='<mask>')
+        return each_type_data.apply(lambda x: len(tokenizer.tokenize(x)))
 
 def data_stats_to_excel(input_path: Path, output_path: Path, tokenizer: str) -> None:
     """
@@ -37,7 +44,9 @@ def data_stats_to_excel(input_path: Path, output_path: Path, tokenizer: str) -> 
     Args:
         input_path (str): the path and filename of dataset to analyse.
         output_path (str): the path and filename for data length statistics output.
-        tokenizer (str, optional): tokenizer options from ('character', 'word'). Defaults to 'word'.
+        tokenizer (str, optional): tokenizer options from ('word', 'character', 'huggingface_model_name').
+                                  'huggingface_model_name' means the name of huggingface model (e.g. 'bert-base-multilingual-cased')
+                                   to get the model's tokenizer. Defaults to 'word'.
     """
     
     # load data

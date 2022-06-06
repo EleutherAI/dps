@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import seaborn as sns
+from transformers import AutoTokenizer
 import os
 import platform
 import warnings
@@ -35,7 +36,9 @@ def get_args() -> argparse.Namespace:
     - max_split_cnts (int, optional): specify how many data types will be split and included in each boxplot image. 
                                       Data type means source of each text data (ex. nsmc, kowiki, naver_blog_post, etc.).
                                       Defaults to 10.
-    - tokenizer (str, optional): choose tokenizer options from ('character', 'word'). Defaults to 'word'.
+    - tokenizer (str, optional): tokenizer options from ('word', 'character', 'huggingface_model_name').
+                                'huggingface_model_name' means the name of huggingface model (e.g. 'bert-base-multilingual-cased')
+                                 to get the model's tokenizer. Defaults to 'word'.
     """
     
     parser = argparse.ArgumentParser()
@@ -45,15 +48,21 @@ def get_args() -> argparse.Namespace:
     
     parser.add_argument("--data_type", type=str, nargs="*")
     parser.add_argument("--max_split_cnts", type=int, default=10)
-    parser.add_argument('--tokenizer', type=str, choices=['character', 'word'], default="word")
+    parser.add_argument('--tokenizer', type=str, default="word", 
+                        help="You can choose any tokenizer applied in huggingface model (https://huggingface.co/models) by feeding name of huggingface model. \
+                        Otherwise, you can simply use word-based or character-based tokenizer by feeding 'word' or 'character'. Defaults to 'word'.")
     
     return parser.parse_args()
 
 def apply_tokenizer(text_data_of_each_type: pd.Series, tokenizer: str) -> pd.Series:
     if tokenizer == 'word':
         return text_data_of_each_type.apply(lambda x: len(x.split(' ')))
-    else:
+    elif tokenizer == 'character':
         return text_data_of_each_type.apply(lambda x: x.replace(' ', '')).apply(len)
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(tokenizer, bos_token='</s>', eos_token='</s>',
+                                                  unk_token='<unk>', pad_token='<pad>', mask_token='<mask>')
+        return text_data_of_each_type.apply(lambda x: len(tokenizer.tokenize(x)))
 
 def make_boxplots(data: pd.DataFrame, data_type: list, output_path: Path, max_split_cnts: int = 10, tokenizer: str = 'word') -> None:
     """
@@ -72,7 +81,7 @@ def make_boxplots(data: pd.DataFrame, data_type: list, output_path: Path, max_sp
                            The filename of boxplot images will be created automatically given arguments.
         max_split_cnts (int, optional): how many data types will be split and included in each boxplot image. 
                                         Defaults to 10.
-        tokenizer (str, optional): tokenizer options from ('character', 'word'). 
+        tokenizer (str, optional): tokenizer options from ('word', 'character', 'huggingface_model_name')
                                    Defaults to 'word'.
     """
 
