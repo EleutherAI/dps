@@ -21,9 +21,8 @@ def apply_tokenizer(each_type_data: pd.Series, tokenizer: str) -> pd.Series:
     elif tokenizer == 'character':
         return each_type_data.apply(lambda x: x.replace(' ', '')).apply(len)
     else:
-        tokenizer = AutoTokenizer.from_pretrained(tokenizer, bos_token='</s>', eos_token='</s>',
-                                                  unk_token='<unk>', pad_token='<pad>', mask_token='<mask>')
-        return each_type_data.apply(lambda x: len(tokenizer.tokenize(x)))
+        hf_tokenizer = AutoTokenizer.from_pretrained(tokenizer)
+        return each_type_data.apply(lambda x: len(hf_tokenizer.tokenize(x)))
 
 def data_stats_to_excel(input_path: Path, output_path: Path, tokenizer: str) -> None:
     """

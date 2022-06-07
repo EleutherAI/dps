@@ -60,9 +60,8 @@ def apply_tokenizer(text_data_of_each_type: pd.Series, tokenizer: str) -> pd.Ser
     elif tokenizer == 'character':
         return text_data_of_each_type.apply(lambda x: x.replace(' ', '')).apply(len)
     else:
-        tokenizer = AutoTokenizer.from_pretrained(tokenizer, bos_token='</s>', eos_token='</s>',
-                                                  unk_token='<unk>', pad_token='<pad>', mask_token='<mask>')
-        return text_data_of_each_type.apply(lambda x: len(tokenizer.tokenize(x)))
+        hf_tokenizer = AutoTokenizer.from_pretrained(tokenizer)
+        return text_data_of_each_type.apply(lambda x: len(hf_tokenizer.tokenize(x)))
 
 def make_boxplots(data: pd.DataFrame, data_type: list, output_path: Path, max_split_cnts: int = 10, tokenizer: str = 'word') -> None:
     """
