@@ -44,7 +44,7 @@ def remove_html_tags(text):
 
 def remove_whitespace(input_text: str, remove_duplicate_whitespace: bool = True) -> str:
     if remove_duplicate_whitespace:
-        return ' '.join(re.split('\\s+', input_text.strip(), flags=re.UNICODE))
+        return ' '.join(re.split('[^\S\r\n]+', input_text.strip(), flags=re.UNICODE))
     return input_text.strip()
 
 
@@ -98,7 +98,7 @@ def reduce_emoticon(text: str, num_repeats=2):
     """
     
     repeatchars_pattern = re.compile('(\w)\\1{2,}')
-    doublespace_pattern = re.compile('\s+')
+    doublespace_pattern = re.compile('[^\S\r\n]+')
     if not text:
         return text
     
