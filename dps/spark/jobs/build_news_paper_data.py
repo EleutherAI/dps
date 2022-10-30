@@ -16,10 +16,8 @@ def build_news_paper_data(dir_path, save_path):
         documents = data['document']
 
         for doc in documents:
-            yield dict(text=' '.join([p['form'] for p in doc['paragraph']]), 
+            yield dict(text='\n'.join([p['form'] for p in doc['paragraph']]), 
                        meta=data['metadata'])
-    
-    # data_path = ','.join(glob(dir_path))
 
     with spark_session(f'build_news_paper_data') as spark:
         sc: SparkContext = spark.sparkContext
