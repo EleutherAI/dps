@@ -10,7 +10,7 @@ import json
 from glob import glob
 
 
-def build_news_paper_data(dir_path, save_path):
+def build_korean_modu_news_paper_data(dir_path, save_path):
 
     def read_files(data):
         documents = data['document']
