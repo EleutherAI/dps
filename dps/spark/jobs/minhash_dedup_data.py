@@ -40,7 +40,7 @@ def explore_dedup_instance(hash_groups, threshold: float = 0.8):
 def minhash_deduplication(input_dir: str, output_dir: str, 
                           n_dist: int = 10, n_output: int = 10, 
                           num_expand: int = 10, sim_threshold: float = 0.8, 
-                          n_gram: int = 15, char_level: bool = False, seed: int = 1):
+                          n_gram: int = 13, char_level: bool = False, seed: int = 1):
 
     with spark_session(f'') as spark:
         sc: SparkContext = spark.sparkContext
