@@ -1,7 +1,7 @@
 """
 Run this from project root path
 
-python bin/sparkapp.py korean_job --config_path=./configs/korean_jsonl.yaml
+python bin/sparkapp.py korean_job --config_path=./configs/korean_job.yaml
 """
 
 import yaml

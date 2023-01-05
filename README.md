@@ -11,14 +11,14 @@ python setup.py install
 python bin/sparkapp.py {job_name} {params}
 
 # Example
-# python bin/sparkapp.py sample_jsonl --config_path=./configs/sample_jsonl.yaml
+# python bin/sparkapp.py sample_job --config_path=./configs/sample_job.yaml
 ```
 
 ## DPS job list
 
  job | describe | param options
   -- | -- | --
-  `sample_jsonl` | Sample jsonl data from text files in directories | `yaml configs`
+  `sample_job` | Sample jsonl data from text files in directories | `yaml configs`
   `dedup_job` | De-duplicate text using MinHash method | `command params`
   `korean_job` | Refine text in Korean language | `yaml configs`
 
@@ -26,7 +26,7 @@ python bin/sparkapp.py {job_name} {params}
 
 ### Test Run
 
-This is test run for `sample_jsonl` job.
+This is test run for `sample_job` job.
 
 #### 1. Setup `dps` package
 
@@ -37,14 +37,14 @@ python setup.py install
 #### 2. Check config file and dataset
 
 ```bash
-cat configs/sample_jsonl.yaml
+cat configs/sample_job.yaml
 ls datasets/test_sample_jsonl_data
 ```
 
-#### 3. Run `sample_jsonl` job by `bin/sparkapp.py`
+#### 3. Run `sample_job` job by `bin/sparkapp.py`
 
 ```bash
-python bin/sparkapp.py sample_jsonl --config_path=./configs/sample_jsonl.yaml
+python bin/sparkapp.py sample_job --config_path=./configs/sample_job.yaml
 ```
 
 #### 4. Check output file
@@ -91,7 +91,7 @@ cat datasets/test_output_data/part-00000
     from .jobs.your_own_job import your_own_job
 
     def run():
-        fire.Fire({'sample_jsonl': sample_jsonl,
+        fire.Fire({'sample_job': sample_job,
                    'your_own_job': your_own_job
                    })
     ```

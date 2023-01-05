@@ -7,7 +7,7 @@ from dps.spark.spark_session import spark_session
 from dps.spark.utils.io_utils import read_line, to_json
 
 
-def sample_jsonl(config_path):
+def sample_job(config_path):
     with open(config_path) as f:
         conf = yaml.load(f, Loader=yaml.FullLoader)
 
