@@ -1,3 +1,9 @@
+"""
+Run this from project root path
+
+python bin/sparkapp.py sample_job --config_path=./configs/sample_job.yaml
+"""
+
 import yaml
 
 from pyspark import SparkContext
