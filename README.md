@@ -65,8 +65,8 @@ cat datasets/test_output_data/part-00000
     from pyspark import SparkContext
     from pyspark.rdd import RDD
 
-    from ..spark_session import spark_session
-    from ..utils.io import read_line, to_json
+    from dps.spark.spark_session import spark_session
+    from dps.spark.utils.io_utils import read_line, to_json
 
 
     def your_own_job(input_path, output_path):
