@@ -1,6 +1,13 @@
+"""
+Run this from project root path
+
+python bin/sparkapp.py dedup_job --config_path=./configs/dedup_job.yaml
+"""
+
 import random
 from itertools import combinations
 
+import yaml
 from pyspark import SparkContext
 from pyspark.rdd import RDD
 
@@ -44,37 +51,36 @@ def explore_dedup_instance(hash_groups, threshold: float = 0.8):
                 yield random.choice(dedup_text)
 
 
-def minhash_deduplication(
-    input_dir: str,
-    output_dir: str,
-    n_dist: int = 10,
-    n_output: int = 10,
-    num_expand: int = 10,
-    sim_threshold: float = 0.8,
-    n_gram: int = 13,
-    char_level: bool = False,
-    seed: int = 1,
-):
+def dedup_job(config_path):
+    with open(config_path) as f:
+        conf = yaml.load(f, Loader=yaml.FullLoader)
+
+    input_paths = ",".join([f'{conf["base_dir"]}/{t}' for t in conf["targets"]])
 
     with spark_session(f"") as spark:
         sc: SparkContext = spark.sparkContext
 
         proc_rdd: RDD = (
-            sc.textFile(input_dir).repartition(n_dist).flatMap(read_line).cache()
+            sc.textFile(input_paths)
+            .repartition(conf["n_dist"])
+            .flatMap(read_line)
+            .cache()
         )
 
         overlap_kv_rdd: RDD = (
             proc_rdd.flatMap(
                 lambda x: expand_instances_by_minhash(
                     x,
-                    expand_size=num_expand,
-                    n_gram=n_gram,
-                    seed=seed,
-                    char_level=char_level,
+                    expand_size=conf["num_expand"],
+                    n_gram=conf["n_gram"],
+                    seed=conf["seed"],
+                    char_level=conf["char_level"],
                 )
             )
             .reduceByKey(lambda x, y: x + y)
-            .flatMap(lambda x: explore_dedup_instance(x[1], threshold=sim_threshold))
+            .flatMap(
+                lambda x: explore_dedup_instance(x[1], threshold=conf["sim_threshold"])
+            )
             .distinct()
             .map(lambda x: (x, dict(text=x)))
             .cache()
@@ -82,4 +88,6 @@ def minhash_deduplication(
 
         proc_rdd.map(lambda x: (x["text"], x)).subtractByKey(overlap_kv_rdd).map(
             lambda x: x[1]
-        ).repartition(n_output).flatMap(to_json).saveAsTextFile(output_dir)
+        ).repartition(conf["n_output"]).flatMap(to_json).saveAsTextFile(
+            conf["output_dir"]
+        )

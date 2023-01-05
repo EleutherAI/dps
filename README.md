@@ -19,7 +19,7 @@ python bin/sparkapp.py {job_name} {params}
  job | describe | param options
   -- | -- | --
   `sample_job` | Sample jsonl data from text files in directories | `yaml configs`
-  `dedup_job` | De-duplicate jsonl data using MinHash method | `command params`
+  `dedup_job` | De-duplicate jsonl data using MinHash method | `yaml configs`
   `korean_job` | Refine jsonl data in Korean language | `yaml configs`
 
 ## Development guides

@@ -1,6 +1,6 @@
 import fire
 
-from .jobs import dedup_job
+from .jobs.dedup_job import dedup_job
 from .jobs.korean_job import korean_job
 from .jobs.sample_job import sample_job
 
