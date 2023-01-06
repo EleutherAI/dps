@@ -78,6 +78,7 @@ def remove_whitespace(text: str, remove_duplicate_whitespace: bool = True) -> st
 def process_html_and_uri_text(text: str):
     text = html.unescape(text)
     text = re.sub(r"<\s*/?\s*br\s*/?\s*>", "\n", text)  # https://chojja7.tistory.com/34
+    text = re.sub(r"<\s*/?\s*BR\s*/?\s*>", "\n", text)  # https://chojja7.tistory.com/34
     text = re.sub(r"%[0-9A-Fa-f]{2}", "", text)
     return text
 
