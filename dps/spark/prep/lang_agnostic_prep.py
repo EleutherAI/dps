@@ -1,3 +1,4 @@
+import html
 import re
 
 from dps.spark.utils.lang_agnostic_utils import (
@@ -72,6 +73,13 @@ def remove_whitespace(text: str, remove_duplicate_whitespace: bool = True) -> st
     if remove_duplicate_whitespace:
         return " ".join(re.split("[^\S\r\n\t\v\f]+", text.strip(), flags=re.UNICODE))
     return text.strip()
+
+
+def process_html_and_uri_text(text: str):
+    text = html.unescape(text)
+    text = re.sub(r"<\s*/?\s*br\s*/?\s*>", "\n", text)  # https://chojja7.tistory.com/34
+    text = re.sub(r"%[0-9A-Fa-f]{2}", "", text)
+    return text
 
 
 def replace_email_and_url(text: str):
