@@ -21,6 +21,7 @@ from dps.spark.prep.lang_agnostic_prep import (
     symbol_to_word_ratio_filter,
     bullet_ellipsis_filter,
     remove_whitespace,
+    process_html_and_uri_text,
     replace_email_and_url,
 )
 from dps.spark.spark_session import spark_session, spark_session_for_cluster
@@ -29,6 +30,7 @@ from dps.spark.utils.io_utils import read_line, to_json
 
 def preprocess_text(input_text: str):
     processing_function_list = [
+        process_html_and_uri_text,
         reduce_emoticon,
         remove_whitespace,
         replace_email_and_url,
@@ -101,7 +103,7 @@ def korean_job(config_path):
                     )
                 )
             )
-            # one more length filter 
+            # one more length filter
             # to exclude "" after preprocess_text()
             .filter(
                 lambda x: doc_len_filter(
