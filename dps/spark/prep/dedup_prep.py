@@ -15,6 +15,7 @@ def shingle_word(text: str, n_gram: int = 15, char_level: bool = False) -> List[
 
     for i in range(len(text_words)):
         shingle = text_words[i : i + n_gram]
+
         if len(shingle) == n_gram:
             res.append("_".join(shingle).encode("utf-8"))
 

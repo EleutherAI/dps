@@ -24,6 +24,7 @@ from dps.spark.utils.korean_utils import (
     PHONE_NUMBER_PATTERN,
     RRN_PATTERN,
     ACCOUNT_PATTERN,
+    BAD_WORDS,
 )
 from dps.spark.utils.lang_agnostic_utils import (
     URL_PATTERN,
@@ -195,6 +196,14 @@ def remove_html_tags(text: str):
         text = clean_space(text)
         text = text.replace(" !", "")
     return text
+
+
+def bad_words_filter(text):
+    """Drop text that contains bad words"""
+    for bad_word in BAD_WORDS:
+        if bad_word in text:
+            return False
+    return True
 
 
 def spam_words_filter(text):

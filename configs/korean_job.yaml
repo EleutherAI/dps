@@ -14,4 +14,4 @@ max_mean_word_len: 10
 symbol_to_word_ratio: 0.1
 bullet_point_ratio: 0.9
 ellipsis_ratio:  0.3
-korean_word_ratio: 0.4
+korean_word_ratio: 0.25

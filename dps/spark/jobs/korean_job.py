@@ -14,6 +14,7 @@ from dps.spark.prep.korean_prep import (
     replace_korean_pii,
     spam_words_filter,
     remove_html_tags,
+    bad_words_filter,
 )
 from dps.spark.prep.lang_agnostic_prep import (
     doc_len_filter,
@@ -23,6 +24,7 @@ from dps.spark.prep.lang_agnostic_prep import (
     remove_whitespace,
     process_html_and_uri_text,
     replace_email_and_url,
+    remove_repeated_text,
 )
 from dps.spark.spark_session import spark_session, spark_session_for_cluster
 from dps.spark.utils.io_utils import read_line, to_json
@@ -37,6 +39,7 @@ def preprocess_text(input_text: str):
         replace_korean_pii,
         spam_words_filter,
         remove_html_tags,
+        remove_repeated_text,
     ]
 
     for func in processing_function_list:
@@ -63,6 +66,11 @@ def korean_job(config_path):
             sc.textFile(input_paths)
             .repartition(conf["n_dist"])
             .flatMap(read_line)
+            .filter(
+                lambda x: bad_words_filter(
+                    x["text"],
+                )
+            )
             .filter(
                 lambda x: doc_len_filter(
                     x["text"],

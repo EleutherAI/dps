@@ -79,7 +79,6 @@ def process_html_and_uri_text(text: str):
     text = html.unescape(text)
     text = re.sub(r"<\s*/?\s*br\s*/?\s*>", "\n", text)  # https://chojja7.tistory.com/34
     text = re.sub(r"<\s*/?\s*BR\s*/?\s*>", "\n", text)  # https://chojja7.tistory.com/34
-    text = re.sub(r"%[0-9A-Fa-f]{2}", "", text)
     return text
 
 
@@ -101,3 +100,65 @@ def replace_email_and_url(text: str):
         text = text.replace(before, after)
 
     return text
+
+
+def remove_repeated_text(input_text, ngram_range=(3, 13), trial=3):
+    def _remove_repeated_phrase(input_text, ngram_range):
+        words = input_text.split()
+        repeated_part_spans = []
+
+        for i, word in enumerate(words):
+            prev_ngrams = {
+                j: " ".join(words[i - j : i])
+                for j in range(ngram_range[0], ngram_range[1] + 1)
+            }
+            next_ngrams = {
+                j: " ".join(words[i + 1 : i + j + 1])
+                for j in range(ngram_range[0], ngram_range[1] + 1)
+            }
+
+            for j, (prev_ngram, next_ngram) in enumerate(
+                zip(prev_ngrams.values(), next_ngrams.values())
+            ):
+                if prev_ngram == next_ngram:
+                    repeated_part_spans.append(((i - j, i), (i + 1, i + j + 1)))
+
+        for word_pos, word in enumerate(words):
+            for span in repeated_part_spans:
+                if word_pos in range(span[0][0], span[0][1]) or word_pos in range(
+                    span[1][0], span[1][1]
+                ):
+                    words[word_pos] = ""
+
+        input_text = " ".join(words)
+        input_text = re.sub(r"\s+", " ", input_text)
+        return input_text.strip(), repeated_part_spans
+
+    def _remove_repeated_word_over_n_times(input_text, n=3):
+        words = input_text.split()
+        repeated = []
+
+        for i, word in enumerate(words):
+            for n_repeat in range(n):
+                if i + n_repeat + 1 < len(words):
+                    if word == words[i + n_repeat + 1]:
+                        repeated.append(i)
+                    else:
+                        break
+
+        # remove repeated
+        for word_pos, word in enumerate(words):
+            if word_pos in repeated:
+                words[word_pos] = ""
+
+        input_text = " ".join(words)
+        input_text = re.sub(r"\s+", " ", input_text)
+        return input_text
+
+    total_len_spans = 0
+    for _ in range(trial):
+        input_text, spans = _remove_repeated_phrase(input_text, ngram_range)
+        total_len_spans += len(spans)
+
+    input_text = _remove_repeated_word_over_n_times(input_text)
+    return input_text
