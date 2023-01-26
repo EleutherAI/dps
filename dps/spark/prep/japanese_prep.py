@@ -12,7 +12,7 @@ def japanese_word_ratio_filter(text, japanese_word_ratio):
          / len(re.sub("[ \r\n\t\f\v", "", text)) + 1e-12
 
 
-def bad_words_filter(text):
+def japanese_bad_words_filter(text):
     for bad_word in BAD_WORDS:
         if bad_word in text:
             return False
