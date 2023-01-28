@@ -3,5 +3,5 @@ fire==0.3.1
 pyyaml
 bs4
 html2text
-stdnum
+python-stdnum
 numpy
