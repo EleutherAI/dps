@@ -1,6 +1,6 @@
 import yaml
-import pyspark import SparkContext
-import pysparkk.rdd import RDD
+from pyspark import SparkContext
+from pyspark.rdd import RDD
 
 from dps.spark.spark_session import spark_session, spark_session_for_cluster
 from dps.spark.utils.io_utils import read_line, to_json
@@ -39,7 +39,7 @@ def preprocess_text(text: str):
 
 def japanese_job(config_path: str):
     with open(config_path) as f:
-        conf = yaml.load(f, loader=yaml.FullLoader)
+        conf = yaml.load(f, Loader=yaml.FullLoader)
 
     input_paths = ",".join([f'{conf["base_dir"]}/{t}' for t in conf["targets"]])
     session_fn = spark_session_for_cluster if conf["is_cluster"] else spark_session

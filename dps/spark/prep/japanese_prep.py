@@ -3,7 +3,7 @@ import sys
 
 from dps.spark.utils.japanese_utils import (
     JAPANESE_CHARS,
-    BAD_WORDS,
+    BAD_WORD_LIST,
 )
 
 
@@ -13,7 +13,7 @@ def japanese_word_ratio_filter(text, japanese_word_ratio):
 
 
 def japanese_bad_words_filter(text):
-    for bad_word in BAD_WORDS:
+    for bad_word in BAD_WORD_LIST:
         if bad_word in text:
             return False
     return True
