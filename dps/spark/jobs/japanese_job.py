@@ -7,7 +7,6 @@ from dps.spark.utils.io_utils import read_line, to_json
 from dps.spark.prep.lang_agnostic_prep import (
     bullet_ellipsis_filter,
     doc_len_filter,
-    mean_word_len_filter,
     process_html_and_uri_text,
     remove_repeated_text,
     remove_whitespace,
@@ -17,6 +16,7 @@ from dps.spark.prep.lang_agnostic_prep import (
 from dps.spark.prep.japanese_prep import (
     japanese_word_ratio_filter,
     japanese_bad_words_filter,
+    japanese_mean_word_len_filter,
 )
 
 
@@ -52,7 +52,7 @@ def japanese_job(config_path: str):
             .flatMap(read_line)
             .filter(lambda x: japanese_bad_words_filter(x["text"]))
             .filter(lambda x: doc_len_filter(x["text"], conf["min_doc_len"], conf["max_doc_len"]))
-            .filter(lambda x: mean_word_len_filter(x["text"], conf["min_mean_word_len"], conf["max_mean_word_len"]))
+            .filter(lambda x: japanese_mean_word_len_filter(x["text"], conf["min_mean_word_len"], conf["max_mean_word_len"]))
             .filter(lambda x: symbol_to_word_ratio_filter(x["text"]), conf["sumbol_to_word_ratio"])
             .filter(lambda x: bullet_ellipsis_filter(x["text"], conf["bullte_poinit_ratio"], conf["ellipsis_ratio"]))
             .filter(lambda x: japanese_word_ratio_filter(x["text"], conf["japanese_word_ratio"]))
