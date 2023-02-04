@@ -1,7 +1,9 @@
 import re
 import sys
 
-from konoha import WordTokenizer
+from sudachipy import dictionary
+from sudachipy import tokenizer
+
 
 from dps.spark.utils.japanese_utils import (
     JAPANESE_CHARS,
@@ -9,10 +11,12 @@ from dps.spark.utils.japanese_utils import (
 )
 
 
-tokenizer = WordTokenizer("Sudachi", mode="C")
+tokenizer_obj = dictionary.Dictionary().create()
+
 
 def word_tokenize(text):
-    tokenized_text = " ".join([t.surface for t in tokenizer.tokenize(text)])
+    mode = tokenizer.Tokenizer.SplitMode.C
+    tokenized_text = " ".join([m.surface() for m in tokenizer_obj.tokenize(text, mode)])
     return tokenized_text
 
 
