@@ -8,7 +8,6 @@ from dps.spark.prep.lang_agnostic_prep import (
     bullet_ellipsis_filter,
     doc_len_filter,
     process_html_and_uri_text,
-    remove_repeated_text,
     remove_whitespace,
     replace_email_and_url,
     symbol_to_word_ratio_filter,
@@ -17,6 +16,7 @@ from dps.spark.prep.japanese_prep import (
     japanese_word_ratio_filter,
     japanese_bad_words_filter,
     japanese_mean_word_len_filter,
+    japanese_remove_repeated_text,
 )
 
 
@@ -25,7 +25,7 @@ def preprocess_text(text: str):
         process_html_and_uri_text,
         remove_whitespace,
         replace_email_and_url,
-        remove_repeated_text,
+        # japanese_remove_repeated_text,
     ]
     for _function in processing_functions:
         text = _function(text)
