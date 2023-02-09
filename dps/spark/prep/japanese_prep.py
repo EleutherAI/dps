@@ -40,3 +40,12 @@ def japanese_mean_word_len_filter(
     words_lens = [len(word) for word in words]
     mean_word_len = sum(words_lens) / len(words_lens)
     return min_mean_word_len <= mean_word_len <= max_mean_word_len
+
+
+def japanese_symbol_to_word_ratio_filter(text: str, symbol_to_word_ratio: float) -> bool:
+    symbols = ["…", "...", "#"]
+    words = word_tokenize(text)
+    return symbol_to_word_ratio >= (
+        len([word for word in words if any([symbol in word for symbol in symbols])])
+        / (len(words) + 1e-12)
+    )
