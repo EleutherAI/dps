@@ -1,0 +1,13 @@
+base_dir: 'datasets/japanese_test_dataset'
+targets:
+    - 0
+    - 1
+output_dir: 'datasets/japanese_dedup_outputs'
+
+n_dist: 10
+n_output: 1
+num_expand: 10
+sim_threshold: 0.8
+n_gram: 32
+char_level: true
+seed: 1
