@@ -381,3 +381,7 @@ dmypy.json
 **/._.DS_Store
 
 # End of https://www.toptal.com/developers/gitignore/api/python,intellij,pycharm+iml,pycharm,vscode
+
+*~
+/*.bz2
+/data

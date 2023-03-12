@@ -1,0 +1,64 @@
+# Configuration file for the DataFrame-based preprocessing of documents
+# ---------------------------------------------------------------------
+
+general:
+  # Set the random seed
+  seed: 1
+
+# Define data source (JSONL files)
+source:
+  base: 's3a://polyglot-romance/'
+  format: json
+  paths:
+    - 'es/2_clean/gutenberg'
+  options:
+    pathGlobFilter: '*.jsonl.bz2'
+    encoding: 'utf-8'
+    
+# Define data destination
+dest:
+  format: jsonl
+  name: 'file:///tmp/preproc_output.jsonl.bz2'
+  mode: overwrite
+  options:
+    compression: bzip2
+
+# Parameters to configure the spark session
+spark:
+  master: 'local[20]'
+  partitions: 20
+  driver:
+    memory: 4g
+  executor:
+    cores: 20
+    memory: 20g
+  config:
+    spark.sql.files.ignoreCorruptFiles: "true"
+    spark.sql.execution.arrow.maxRecordsPerBatch: 2000
+  logging:
+    level: WARN
+
+
+# Configuration for logging
+logging:
+  reset: true
+  logconfig:
+    filename: '/tmp/preproc.log'
+    level: DEBUG
+
+
+# Define preprocessing steps
+preprocess:
+
+  langfilter:
+    chunk_size: 20
+    max_chunks: 10
+    min_lang_score: 0.8
+    min_chunk_ratio: 0.6
+    min_lang_ratio: 0.3
+    keep_lang:
+      - es
+      - fr
+      - pt
+      - it
+      - ro
