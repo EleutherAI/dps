@@ -16,8 +16,9 @@ from dps.spark.prep.japanese_prep import (
     japanese_word_ratio_filter,
     japanese_bad_words_filter,
     japanese_mean_word_len_filter,
-    japanese_remove_repeated_text,
+    #japanese_remove_repeated_text,
     japanese_symbol_to_word_ratio_filter,
+    japanese_frequent_char_existence_filter
 )
 
 
@@ -59,5 +60,7 @@ def japanese_job(config_path: str):
             .filter(lambda x: japanese_word_ratio_filter(x["text"], conf["japanese_word_ratio"]))
             .filter(lambda x: dict(text=preprocess_text(x["text"])))
             .filter(lambda x: doc_len_filter(x["text"], conf["min_doc_len"], conf["max_doc_len"]))
+            .filter(lambda x: japanese_frequent_char_existence_filter(x["text"], conf["freq_char_ratio"]))
         )
         proc_rdd.repartition(conf["n_output"]).flatMap(to_json).saveAsTextFile(conf["output_dir"])
+        

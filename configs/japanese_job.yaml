@@ -16,3 +16,4 @@ symbol_to_word_ratio: 0.1
 bullet_point_ratio: 0.9
 ellipsis_ratio:  0.3
 japanese_word_ratio: 0.8
+freq_char_ratio: 0.9
