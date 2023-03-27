@@ -3,6 +3,8 @@ import sys
 
 import html2text
 from bs4 import BeautifulSoup
+import re
+import unicodedata
 
 from dps.spark.utils.korean_utils import (
     KOR_BEGIN,
@@ -237,4 +239,11 @@ def replace_korean_pii(text: str):
     for before, after in replaces:
         text = text.replace(before, after)
 
+    return text
+
+
+def make_compat(text):
+    # code by kyubyong park
+    text = unicodedata.normalize("NFC", text)
+    text = re.sub("[\u1100-\u11FF]", "", text)
     return text
