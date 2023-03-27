@@ -8,6 +8,7 @@ from sudachipy import tokenizer
 from dps.spark.utils.japanese_utils import (
     JAPANESE_CHARS,
     BAD_WORD_LIST,
+    JAPANESE_FREQ_CHAR_LIST
 )
 
 
@@ -49,3 +50,11 @@ def japanese_symbol_to_word_ratio_filter(text: str, symbol_to_word_ratio: float)
         len([word for word in words if any([symbol in word for symbol in symbols])])
         / (len(words) + 1e-12)
     )
+
+def japanese_frequent_char_existence_filter(text: str, freq_char_ratio: float) -> bool:
+    # return freq_char_ratio <= ( 
+    return freq_char_ratio > ( # return bad text
+        sum([re.search(chr, text)!=None for chr in JAPANESE_FREQ_CHAR_LIST])
+        /len(JAPANESE_FREQ_CHAR_LIST)
+    )
+    
