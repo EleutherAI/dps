@@ -15,6 +15,7 @@ from dps.spark.prep.korean_prep import (
     spam_words_filter,
     remove_html_tags,
     bad_words_filter,
+    make_compat,
 )
 from dps.spark.prep.lang_agnostic_prep import (
     doc_len_filter,
@@ -66,6 +67,13 @@ def korean_job(config_path):
             sc.textFile(input_paths)
             .repartition(conf["n_dist"])
             .flatMap(read_line)
+            .map(
+                lambda x: dict(
+                    text=make_compat(
+                        x["text"],
+                    ),
+                )
+            )
             .filter(
                 lambda x: bad_words_filter(
                     x["text"],
