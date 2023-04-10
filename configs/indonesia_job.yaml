@@ -1,4 +1,4 @@
-base_dir: './datasets/test_korean_jsonl_data'
+base_dir: './datasets/test_indonesia_jsonl_data'
 targets:
   - 0
   - 1
@@ -14,4 +14,4 @@ max_mean_word_len: 10
 symbol_to_word_ratio: 0.1
 bullet_point_ratio: 0.9
 ellipsis_ratio:  0.3
-korean_word_ratio: 0.25
+indonesia_word_ratio: 0.25
