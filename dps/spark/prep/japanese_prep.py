@@ -51,10 +51,12 @@ def japanese_symbol_to_word_ratio_filter(text: str, symbol_to_word_ratio: float)
         / (len(words) + 1e-12)
     )
 
-def japanese_frequent_char_existence_filter(text: str, freq_char_ratio: float) -> bool:
-    # return freq_char_ratio <= ( 
-    return freq_char_ratio > ( # return bad text
+def japanese_frequent_char_existence_filter(text: str, freq_char_cnt: int) -> bool:
+    return freq_char_ratio <= ( 
         sum([re.search(chr, text)!=None for chr in JAPANESE_FREQ_CHAR_LIST])
-        /len(JAPANESE_FREQ_CHAR_LIST)
     )
-    
+
+def reduce_japanese_emoticon(text):
+    text = re.sub("w{3,}", "www", text)
+    text = re.sub("笑{2,}", "笑", text)
+    return text
