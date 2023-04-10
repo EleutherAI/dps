@@ -18,7 +18,8 @@ from dps.spark.prep.japanese_prep import (
     japanese_mean_word_len_filter,
     #japanese_remove_repeated_text,
     japanese_symbol_to_word_ratio_filter,
-    japanese_frequent_char_existence_filter
+    japanese_frequent_char_existence_filter,
+    reduce_japanese_emoticon
 )
 
 
@@ -27,6 +28,7 @@ def preprocess_text(text: str):
         process_html_and_uri_text,
         remove_whitespace,
         replace_email_and_url,
+        reduce_japanese_emoticon
         # japanese_remove_repeated_text,
     ]
     for _function in processing_functions:
