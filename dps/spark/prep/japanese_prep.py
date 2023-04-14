@@ -52,7 +52,7 @@ def japanese_symbol_to_word_ratio_filter(text: str, symbol_to_word_ratio: float)
     )
 
 def japanese_frequent_char_existence_filter(text: str, freq_char_cnt: int) -> bool:
-    return freq_char_ratio <= ( 
+    return freq_char_cnt <= (
         sum([re.search(chr, text)!=None for chr in JAPANESE_FREQ_CHAR_LIST])
     )
 
