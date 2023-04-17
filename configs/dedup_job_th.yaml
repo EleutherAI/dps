@@ -1,0 +1,12 @@
+base_dir: './datasets/test_thai_jsonl_data'
+targets: 
+    - input
+output_dir: './datasets/test_thai_jsonl_data/output'
+
+n_dist: 10
+n_output: 1
+num_expand: 10
+sim_threshold: 0.8
+n_gram: 13
+char_level: false
+seed: 1
