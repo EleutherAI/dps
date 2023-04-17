@@ -70,3 +70,7 @@ def many_separators_filter(text):
     # return (whitespace_ratio <= 0.1) and (touten_ratio <= 0.1)
     # NOTE: test and check the filter with the opposite condition
     return (whitespace_ratio > 0.1) or (touten_ratio > 0.1)
+
+
+def remove_symbols(text):
+    return text.replace("[…]", "")
