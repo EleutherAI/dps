@@ -67,12 +67,12 @@ def reduce_japanese_emoticon(text):
     return text
 
 
-def many_separators_filter(text):
+def many_separators_filter(text: str, separator_ratio: float):
     whitespace_ratio = (len(text.split()) - 1) / len(text)
     touten_ratio = (len(text.split("、")) - 1) / len(text)
-    # return (whitespace_ratio <= 0.1) and (touten_ratio <= 0.1)
+    return (whitespace_ratio <= separator_ratio) and (touten_ratio <= separator_ratio)
     # NOTE: test and check the filter with the opposite condition
-    return (whitespace_ratio > 0.1) or (touten_ratio > 0.1)
+    # return (whitespace_ratio > 0.1) or (touten_ratio > 0.1)
 
 
 def remove_symbols(text):

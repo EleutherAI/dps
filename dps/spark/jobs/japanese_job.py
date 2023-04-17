@@ -48,7 +48,11 @@ def japanese_job(config_path: str):
         conf = yaml.load(f, Loader=yaml.FullLoader)
 
     input_paths = ",".join([f'{conf["base_dir"]}/{t}' for t in conf["targets"]])
-    session_fn = spark_session_for_cluster if conf["is_cluster"] else spark_session
+    if conf["is_local"]:
+        from dps.spark.spark_session import spark_session_local
+        sessin_fn = spark_session_local
+    else:
+        session_fn = spark_session_for_cluster if conf["is_cluster"] else spark_session
 
     with session_fn("Japanse text processing job") as spark:
         sc: SparkContext = spark.sparkContext
@@ -66,7 +70,7 @@ def japanese_job(config_path: str):
             .filter(lambda x: doc_len_filter(x["text"], conf["min_doc_len"], conf["max_doc_len"]))
             .filter(lambda x: japanese_frequent_char_existence_filter(x["text"], conf["freq_char_cnt"]))
             .filter(lambda x: reduce_japanese_emoticon(x["text"]))
-            .filter(lambda x: many_separators_filter(x["text"]))
+            .filter(lambda x: many_separators_filter(x["text"]), conf["separator_ratio"])
             .filter(lambda x: remove_symbols(x["text"]))
         )
         proc_rdd.repartition(conf["n_output"]).flatMap(to_json).saveAsTextFile(conf["output_dir"])
