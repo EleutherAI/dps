@@ -44,7 +44,10 @@ def japanese_mean_word_len_filter(
 
 
 def japanese_symbol_to_word_ratio_filter(text: str, symbol_to_word_ratio: float) -> bool:
-    symbols = ["…", "...", "#"]
+    symbols = [
+        "...", "…", "[…]",
+        "#",
+    ]
     words = word_tokenize(text)
     return symbol_to_word_ratio >= (
         len([word for word in words if any([symbol in word for symbol in symbols])])
