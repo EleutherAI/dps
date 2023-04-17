@@ -19,7 +19,8 @@ from dps.spark.prep.japanese_prep import (
     #japanese_remove_repeated_text,
     japanese_symbol_to_word_ratio_filter,
     japanese_frequent_char_existence_filter,
-    reduce_japanese_emoticon
+    reduce_japanese_emoticon,
+    many_separators_filter,
 )
 
 
@@ -64,6 +65,7 @@ def japanese_job(config_path: str):
             .filter(lambda x: doc_len_filter(x["text"], conf["min_doc_len"], conf["max_doc_len"]))
             .filter(lambda x: japanese_frequent_char_existence_filter(x["text"], conf["freq_char_cnt"]))
             .filter(lambda x: reduce_japanese_emoticon(x["text"]))
+            .filter(lambda x: many_separators_filter(x["text"]))
         )
         proc_rdd.repartition(conf["n_output"]).flatMap(to_json).saveAsTextFile(conf["output_dir"])
         

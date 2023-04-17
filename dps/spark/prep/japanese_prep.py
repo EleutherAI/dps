@@ -51,12 +51,22 @@ def japanese_symbol_to_word_ratio_filter(text: str, symbol_to_word_ratio: float)
         / (len(words) + 1e-12)
     )
 
+
 def japanese_frequent_char_existence_filter(text: str, freq_char_cnt: int) -> bool:
     return freq_char_cnt <= (
         sum([re.search(chr, text)!=None for chr in JAPANESE_FREQ_CHAR_LIST])
     )
 
+
 def reduce_japanese_emoticon(text):
     text = re.sub("w{3,}", "www", text)
     text = re.sub("笑{2,}", "笑", text)
     return text
+
+
+def many_separators_filter(text):
+    whitespace_ratio = (len(text.split()) - 1) / len(text)
+    touten_ratio = (len(text.split("、")) - 1) / len(text)
+    # return (whitespace_ratio <= 0.1) and (touten_ratio <= 0.1)
+    # NOTE: test and check the filter with the opposite condition
+    return (whitespace_ratio > 0.1) or (touten_ratio > 0.1)
