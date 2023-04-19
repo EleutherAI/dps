@@ -44,19 +44,36 @@ def japanese_mean_word_len_filter(
 
 
 def japanese_symbol_to_word_ratio_filter(text: str, symbol_to_word_ratio: float) -> bool:
-    symbols = ["…", "...", "#"]
+    symbols = [
+        "...", "…", "[…]",
+        "#",
+    ]
     words = word_tokenize(text)
     return symbol_to_word_ratio >= (
         len([word for word in words if any([symbol in word for symbol in symbols])])
         / (len(words) + 1e-12)
     )
 
+
 def japanese_frequent_char_existence_filter(text: str, freq_char_cnt: int) -> bool:
-    return freq_char_ratio <= ( 
+    return freq_char_cnt <= (
         sum([re.search(chr, text)!=None for chr in JAPANESE_FREQ_CHAR_LIST])
     )
+
 
 def reduce_japanese_emoticon(text):
     text = re.sub("w{3,}", "www", text)
     text = re.sub("笑{2,}", "笑", text)
     return text
+
+
+def many_separators_filter(text: str, separator_ratio: float):
+    whitespace_ratio = (len(text.split()) - 1) / len(text)
+    touten_ratio = (len(text.split("、")) - 1) / len(text)
+    return (whitespace_ratio <= separator_ratio) and (touten_ratio <= separator_ratio)
+    # NOTE: test and check the filter with the opposite condition
+    # return (whitespace_ratio > 0.1) or (touten_ratio > 0.1)
+
+
+def remove_symbols(text):
+    return text.replace("[…]", "")
