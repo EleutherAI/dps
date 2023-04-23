@@ -12,18 +12,6 @@ from sparknlp.annotator import WordSegmenterModel
 from sparknlp.base import DocumentAssembler
 
 
-def create_spark_session() -> SparkSession:
-    spark = SparkSession.builder \
-        .appName("Spark NLP Enterprise") \
-        .master("local[*]") \
-        .config("spark.driver.memory","16") \
-        .config("spark.driver.maxResultSize", "2G") \
-        .config("spark.jars.packages", "com.johnsnowlabs.nlp:spark-nlp_2.11:${version_public}") \
-        .config("spark.jars", "https://pypi.johnsnowlabs.com/${secret.code}/spark-nlp-jsl-${version}.jar") \
-        .getOrCreate()
-    return spark
-
-
 def create_feature_pipeline() -> Pipeline:
     hashing_tf = HashingTF(inputCol="result", outputCol="features", numFeatures=2**14)
     idf = IDF(inputCol="features", outputCol="idf_features")
@@ -57,8 +45,9 @@ def main() -> None:
     # arguments
     threshold = 0.8
 
-    spark = create_spark_session()
-    sc: SparkContext = spark.sparkContext
+    spark = sparknlp.start()
+    print("Spark NLP version: ", sparknlp.version())
+    print("Apache Spark version: ", spark.version)
 
     example = spark.createDataFrame([
         ['清代は湖北省が置かれ、そのまま現代の行政区分になっている。'],
