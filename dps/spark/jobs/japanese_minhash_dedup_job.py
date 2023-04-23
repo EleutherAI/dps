@@ -1,8 +1,12 @@
 """inspired from `depup_job_romance_minhash.py `"""
 import argparse
 
+import yaml
+
+from pyspark import SparkContext
 from pyspark.ml import Pipeline
 from pyspark.ml.feature import HashingTF, IDF, MinHashLSH
+from pyspark.rdd import RDD
 from pyspark.sql import DataFrame, SparkSession
 import pyspark.sql.functions as F
 from pyspark.sql.functions import col
@@ -10,6 +14,8 @@ from pyspark.sql.functions import col
 import sparknlp
 from sparknlp.annotator import WordSegmenterModel
 from sparknlp.base import DocumentAssembler
+
+from dps.spark.utils.io_utils import read_line, to_json
 
 
 def create_feature_pipeline() -> Pipeline:
@@ -42,22 +48,28 @@ def deduplicate_dataset(df: DataFrame, threshold: float) -> DataFrame:
 
 
 def main() -> None:
-    # arguments
-    threshold = 0.8
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config_path", type=str, required=True)
+    args, _ = parser.parse_known_args()
+    config_path = args.config_path
+
+    with open(config_path) as f:
+        conf = yaml.load(f, Loader=yaml.FullLoader)
+    threshold = conf['threshold']
+    input_paths = ",".join([f"{conf['base_dir']}/{t}" for t in conf['targets']])
 
     spark = sparknlp.start()
     print("Spark NLP version: ", sparknlp.version())
     print("Apache Spark version: ", spark.version)
 
-    example = spark.createDataFrame([
-        ['清代は湖北省が置かれ、そのまま現代の行政区分になっている。'],
-        ['清代は湖北省が置かれ、そのまま現在の行政区分になっている。'],
-        ['清代は湖北省が置かれたが、それがそのまま現在の行政区分になっているというわけではない。'],
-        ['データブリックスは、学術界とオープンソースコミュニティをルーツとするデータサイエンス＋AIの企業です。'],
-        ['データブリックスは、学術界とオープンソースコミュニティをルーツとするデータ＋AIの企業です。'],
-        ['データブリックスは、学術界とオープンソースコミュニティをルーツとするデータの企業です。'],
-        ['ジョンスノーラボからこんにちは！ ']
-    ], ["text"])
+    sc: SparkContext = spark.sparkContext
+    proc_rdd: RDD = (
+        sc.textFile(input_paths)
+        .repartition(conf['n_dist'])
+        .flatMap(read_line)
+        .cache()
+    )
+    example = proc_rdd.toDF(['text'])
 
     # Word segmenter or Tokenizer
     document_assembler = DocumentAssembler()\
@@ -92,7 +104,9 @@ def main() -> None:
     deduplicated_ids = filtered_pairs.select(F.col("datasetA.id").alias("id")).distinct()
     deduplicated_df = df.join(deduplicated_ids, "id", "leftanti")
     
-    print(deduplicated_df.toPandas().loc[:, ["id", "text"]])
+    deduplicated_df.rdd\
+        .map(lambda x: dict(text=x[1]))\
+        .repartition(conf['n_output']).flatMap(to_json).saveAsTextFile(conf['output_dir'])
 
 
 if __name__ == "__main__":
