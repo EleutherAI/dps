@@ -92,8 +92,7 @@ def main() -> None:
     deduplicated_ids = filtered_pairs.select(F.col("datasetA.id").alias("id")).distinct()
     deduplicated_df = df.join(deduplicated_ids, "id", "leftanti")
     
-    print(deduplicated_df.toPandas())
-    spark.stop()
+    print(deduplicated_df.toPandas().loc[:, ["id", "text"]])
 
 
 if __name__ == "__main__":
