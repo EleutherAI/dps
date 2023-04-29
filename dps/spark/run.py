@@ -5,7 +5,6 @@ from .jobs.korean_job import korean_job
 from .jobs.japanese_job import japanese_job
 from .jobs.sample_job import sample_job
 
-
 def run():
     fire.Fire(
         {

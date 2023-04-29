@@ -1,0 +1,31 @@
+base_dir: '/fsx/home-KaeunLee/to_jsonl/jsonl'
+targets:
+    - jsonl_amazon_reviews
+    - jsonl_cail
+    - jsonl_cmrc2018
+    - jsonl_covid_qa_ucsd
+    - jsonl_ekar
+    - jsonl_gem
+    - jsonl_hatecheck
+    - jsonl_kde4
+    - jsonl_lccc
+    - jsonl_mc4
+    - jsonl_multilingual_sentiment
+    - jsonl_nlpcc_stance
+    - jsonl_opus_paracrawl
+    - jsonl_oscar
+    - jsonl_spc
+    - jsonl_ted_talks_iwslt
+    - jsonl_un_ga
+    - jsonl_wiki
+    - jsonl_xquad
+    - jsonl_zh_hans
+output_dir: '/fsx/hyein/2023/datasets/chinese_dedup_outputs2'
+
+n_dist: 10
+n_output: 1
+num_expand: 10
+sim_threshold: 0.8
+n_gram: 32
+char_level: true
+seed: 1
