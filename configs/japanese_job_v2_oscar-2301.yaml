@@ -1,0 +1,21 @@
+# pre-processing:
+base_dir: '/fsx/polyglot_data/major/ja/0_raw/oscar-2301'
+targets:
+  - ""
+output_dir: '/fsx/polyglot_data/major/ja/2_quality_filter/v2/oscar-2301'
+
+n_dist: 64
+n_output: 100
+is_cluster: False
+is_local: False
+
+min_doc_len: 50
+max_doc_len: 100000
+min_mean_word_len: 1
+max_mean_word_len: 10
+symbol_to_word_ratio: 0.1
+bullet_point_ratio: 0.9
+ellipsis_ratio:  0.3
+japanese_word_ratio: 0.8
+freq_char_cnt: 1
+separator_ratio: 0.1
