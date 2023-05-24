@@ -1,11 +1,14 @@
 import re
 import sys
 
-from dps.spark.utils.japanese_utils import (
-    SIMPLIFIED_CHINESE,
-    BAD_WORDS,
-)
+from dps.spark.utils.korean_utils import BAD_WORDS
 
+# from dps.spark.utils.japanese_utils import (
+#     # SIMPLIFIED_CHINESE,
+#     BAD_WORDS,
+# )
+SIMPLIFIED_CHINESE = ''
+BAD_WORDS = ''
 
 def chinese_word_ratio_filter(text, chinese_word_ratio):
     return chinese_word_ratio <= len(re.findall(f"[{SIMPLIFIED_CHINESE}]", text)) / (
