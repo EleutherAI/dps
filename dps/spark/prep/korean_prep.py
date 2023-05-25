@@ -166,7 +166,12 @@ def remove_html_tags(text: str):
         return text.strip()
 
     if bool(BeautifulSoup(text, "html.parser").find()):
-        text = html2text.html2text(text)
+        try:
+            processed_html = html2text.html2text(text)
+        except AssertionError:
+            processed_html = text
+        
+        text = processed_html
         text = clean_space(text)
 
         for pattern in [
