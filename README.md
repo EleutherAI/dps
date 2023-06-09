@@ -1,6 +1,6 @@
 # DPS (Data Processing System)
 
-## Requriements
+## Requirements
 
 - python 3.8
 
