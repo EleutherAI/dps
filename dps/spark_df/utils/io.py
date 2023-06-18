@@ -50,4 +50,9 @@ def write_dataframe(df: DataFrame, dest: Dict):
     if fmt == "jsonl":
         fmt = "json"
 
+    num_part = dest.get("partitions")
+    if num_part:
+        LOGGER.info("Repartitioning: %d", num_part)
+        df = df.repartition(num_part)
+
     df.write.format(fmt).mode(mode).options(**outopts).save(outname)

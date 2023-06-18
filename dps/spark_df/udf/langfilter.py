@@ -114,7 +114,8 @@ class LangFilter:
                 urllib.request.urlretrieve(model_url, filename=filename)
 
         # Load the model
-        return fasttext.load_model(filename)
+        #return fasttext.load_model(filename)   # avoid useless warning
+        return _FastText(filename)
 
 
     def _langdetect(self, text: str) -> str:

@@ -7,8 +7,10 @@ from functools import partial, partialmethod
 import logging
 
 from logging import CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET  # noqa: F401
+from logging import getLevelName   # noqa: F401
 
-# The name of the new level
+
+# The name & numeric value of the new level we are defining
 TRACE_NAME = 'TRACE'
 TRACE = DEBUG - 5
 

@@ -1,17 +1,48 @@
 import sys
+from pathlib import Path
+from shutil import copytree
+
 from setuptools import setup, find_packages
+from setuptools.command.install import install
+from setuptools.command.develop import develop
+
+from dps.spark_df import VERSION
 
 PKGNAME = "dps"
-PKGVERSION = "0.1.0"
+PYTHON_MIN_VERSION = (3, 8)
 
-PYTHON_VERSION = (3, 8)
-
-if sys.version_info < PYTHON_VERSION:
+if sys.version_info < PYTHON_MIN_VERSION:
     sys.exit(
         "**** Sorry, {} {} needs at least Python {}".format(
-            PKGNAME, PKGVERSION, ".".join(map(str, PYTHON_VERSION))
+            PKGNAME, VERSION, ".".join(map(str, PYTHON_MIN_VERSION))
         )
     )
+
+
+def post_install_hook():
+    '''
+    Execute post-install tasks
+    '''
+    src_dir = Path(__file__).parent / "configs"
+    dst_dir = Path(sys.prefix) / "etc" / "dps"
+    try:
+        copytree(src_dir, dst_dir, dirs_exist_ok=True)
+    except Exception as e:
+        print(repr(e), file=sys.stderr, flush=True)
+        raise
+
+
+class PostInstall(install):
+    def run(self):
+        super().run()
+        post_install_hook()
+
+
+class PostDevelop(develop):
+    def run(self):
+        super().run()
+        raise Exception()
+        post_install_hook()
 
 
 def requirements(filename="requirements-df.txt"):
@@ -22,7 +53,7 @@ def requirements(filename="requirements-df.txt"):
 
 setup(
     name=PKGNAME,
-    version=PKGVERSION,
+    version=VERSION,
     packages=find_packages("."),
     license="Apache",
     entry_points={
@@ -31,5 +62,7 @@ setup(
         ]
     },
     python_requires=">=3.8",
-    install_requires=requirements()
+    install_requires=requirements(),
+    cmdclass={'install': PostInstall,
+              'develop': PostDevelop}
 )
