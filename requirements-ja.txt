@@ -6,3 +6,4 @@ html2text
 python-stdnum
 numpy
 SudachiPy==0.5.4
+SudachiDict-core
