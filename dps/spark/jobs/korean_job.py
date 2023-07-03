@@ -4,6 +4,7 @@ Run this from project root path
 python bin/sparkapp.py korean_job --config_path=./configs/korean_job.yaml
 """
 
+import os
 import yaml
 from pyspark import SparkContext
 from pyspark.rdd import RDD
@@ -58,14 +59,21 @@ def korean_job(config_path):
     with open(config_path) as f:
         conf = yaml.load(f, Loader=yaml.FullLoader)
 
-    input_paths = ",".join([f'{conf["base_dir"]}/{t}' for t in conf["targets"]])
+    if conf['targets'] == ['all']:
+        input_paths = f'{conf["base_dir"]}/*/*.jsonl'
+    else:
+        input_paths = ','.join([f'{conf["base_dir"]}/{t}/*.jsonl' for t in conf["targets"]])
     session_fn = spark_session_for_cluster if conf["is_cluster"] else spark_session
 
     with session_fn("korean text processing job") as spark:
         sc: SparkContext = spark.sparkContext
+
+        # set heap memorty
+        sc._conf.set('spark.driver.memory', '15g')
+
+        print(sc.getConf().getAll())
         proc_rdd: RDD = (
-            sc.textFile(input_paths)
-            .repartition(conf["n_dist"])
+            sc.textFile(input_paths).repartition(conf["n_dist"])
             .flatMap(read_line)
             .map(
                 lambda x: dict(

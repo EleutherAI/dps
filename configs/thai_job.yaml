@@ -1,0 +1,18 @@
+base_dir: './datasets/test_thai_jsonl_data'
+targets:
+  - input
+output_dir: './datasets/test_thai_jsonl_data/output'
+
+n_dist: 10
+n_output: 1
+is_cluster: False
+
+min_doc_len: 50
+max_doc_len: 100000
+min_mean_word_len: 1
+max_mean_word_len: 10
+symbol_to_word_ratio: 0.1
+bullet_point_ratio: 0.9
+ellipsis_ratio:  0.3
+japanese_word_ratio: 0.8
+freq_char_ratio: 0.9
