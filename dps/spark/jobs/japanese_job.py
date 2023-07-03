@@ -65,4 +65,27 @@ def japanese_job(config_path: str):
             .filter(lambda x: japanese_frequent_char_existence_filter(x["text"], conf["freq_char_cnt"]))
         )
         proc_rdd.repartition(conf["n_output"]).flatMap(to_json).saveAsTextFile(conf["output_dir"])
-        
+
+
+def exact_dedup_job(config_path: str):
+    with open(config_path) as f:
+        conf = yaml.load(f, Loader=yaml.FullLoader)
+
+    input_paths = ",".join([f'{conf["base_dir"]}/{t}' for t in conf["targets"]])
+    if conf["is_local"]:
+        from dps.spark.spark_session import spark_session_local
+        session_fn = spark_session_local
+    else:
+        session_fn = spark_session_for_cluster if conf["is_cluster"] else spark_session
+
+    with session_fn("Exact Deduplication") as spark:
+        sc: SparkContext = spark.sparkContext
+        proc_rdd: RDD = (
+            sc.textFile(input_paths)
+            .repartition(conf["n_dist"])
+            .flatMap(read_line)
+            .map(lambda x: x['text'])
+            .distinct()
+            .map(lambda x: dict(text=x))
+        )
+        proc_rdd.repartition(conf["n_output"]).flatMap(to_json).saveAsTextFile(conf["output_dir"])
