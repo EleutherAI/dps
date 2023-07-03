@@ -1,0 +1,9 @@
+base_dir: "./datasets/test_ja_minhashlsh_dedup_job"
+targets:
+  - "0.jsonl"
+output_dir: "./outputs/test_ja_minhashlsh_dedup_job"
+
+n_dist: 2
+n_output: 1
+
+threshold: 0.9
