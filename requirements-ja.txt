@@ -5,4 +5,4 @@ bs4
 html2text
 python-stdnum
 numpy
-sudachidict_core
+SudachiPy==0.5.4
