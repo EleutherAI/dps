@@ -44,9 +44,14 @@ def preprocess_text(text: str):
 def japanese_job(config_path: str):
     with open(config_path) as f:
         conf = yaml.load(f, Loader=yaml.FullLoader)
+    use_column = conf["use_column"]
 
     input_paths = ",".join([f'{conf["base_dir"]}/{t}' for t in conf["targets"]])
-    session_fn = spark_session_for_cluster if conf["is_cluster"] else spark_session
+    if conf["is_local"]:
+        from dps.spark.spark_session import spark_session_local
+        session_fn = spark_session_local
+    else:
+        session_fn = spark_session_for_cluster if conf["is_cluster"] else spark_session
 
     with session_fn("Japanse text processing job") as spark:
         sc: SparkContext = spark.sparkContext
@@ -54,15 +59,18 @@ def japanese_job(config_path: str):
             sc.textFile(input_paths)
             .repartition(conf["n_dist"])
             .flatMap(read_line)
-            .filter(lambda x: japanese_bad_words_filter(x["text"]))
-            .filter(lambda x: doc_len_filter(x["text"], conf["min_doc_len"], conf["max_doc_len"]))
-            .filter(lambda x: japanese_mean_word_len_filter(x["text"], conf["min_mean_word_len"], conf["max_mean_word_len"]))
-            .filter(lambda x: japanese_symbol_to_word_ratio_filter(x["text"], conf["symbol_to_word_ratio"]))
-            .filter(lambda x: bullet_ellipsis_filter(x["text"], conf["bullet_point_ratio"], conf["ellipsis_ratio"]))
-            .filter(lambda x: japanese_word_ratio_filter(x["text"], conf["japanese_word_ratio"]))
-            .filter(lambda x: dict(text=preprocess_text(x["text"])))
-            .filter(lambda x: doc_len_filter(x["text"], conf["min_doc_len"], conf["max_doc_len"]))
-            .filter(lambda x: japanese_frequent_char_existence_filter(x["text"], conf["freq_char_cnt"]))
+            .filter(lambda x: japanese_bad_words_filter(x[use_column]))
+            .filter(lambda x: doc_len_filter(x[use_column], conf["min_doc_len"], conf["max_doc_len"]))
+            .filter(lambda x: japanese_mean_word_len_filter(x[use_column], conf["min_mean_word_len"], conf["max_mean_word_len"]))
+            .filter(lambda x: japanese_symbol_to_word_ratio_filter(x[use_column], conf["symbol_to_word_ratio"]))
+            .filter(lambda x: bullet_ellipsis_filter(x[use_column], conf["bullet_point_ratio"], conf["ellipsis_ratio"]))
+            .filter(lambda x: japanese_word_ratio_filter(x[use_column], conf["japanese_word_ratio"]))
+            .filter(lambda x: dict(text=preprocess_text(x[use_column])))
+            .filter(lambda x: doc_len_filter(x[use_column], conf["min_doc_len"], conf["max_doc_len"]))
+            .filter(lambda x: japanese_frequent_char_existence_filter(x[use_column], conf["freq_char_cnt"]))
+            .filter(lambda x: reduce_japanese_emoticon(x[use_column]))
+            .filter(lambda x: many_separators_filter(x[use_column], conf["separator_ratio"]))
+            .filter(lambda x: remove_symbols(x[use_column]))
         )
         proc_rdd.repartition(conf["n_output"]).flatMap(to_json).saveAsTextFile(conf["output_dir"])
 
@@ -70,6 +78,7 @@ def japanese_job(config_path: str):
 def exact_dedup_job(config_path: str):
     with open(config_path) as f:
         conf = yaml.load(f, Loader=yaml.FullLoader)
+    use_column = conf["use_column"]
 
     input_paths = ",".join([f'{conf["base_dir"]}/{t}' for t in conf["targets"]])
     if conf["is_local"]:
@@ -84,7 +93,7 @@ def exact_dedup_job(config_path: str):
             sc.textFile(input_paths)
             .repartition(conf["n_dist"])
             .flatMap(read_line)
-            .map(lambda x: x['text'])
+            .map(lambda x: x[use_column])
             .distinct()
             .map(lambda x: dict(text=x))
         )
