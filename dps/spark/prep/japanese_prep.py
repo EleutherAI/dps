@@ -17,7 +17,7 @@ tokenizer_obj = dictionary.Dictionary().create()
 
 def word_tokenize(text):
     mode = tokenizer.Tokenizer.SplitMode.C
-    tokenized_text = " ".join([m.surface() for m in tokenizer_obj.tokenize(text, mode)])
+    tokenized_text = [m.surface() for m in tokenizer_obj.tokenize(text, mode)]
     return tokenized_text
 
 
