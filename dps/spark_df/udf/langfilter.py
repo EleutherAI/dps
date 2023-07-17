@@ -1,7 +1,7 @@
 """
 Language filtering object
  * Detect language in text records. Divide text in chunks and detect the
-   language of each chunks, retain all languages that were detected in more
+   language of each chunk. Retain all languages that were detected in more
    than the required minimum ratio of chunks
  * Filter records according to the text language(s)
 """

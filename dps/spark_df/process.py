@@ -27,7 +27,7 @@ def process(args: Dict):
     # Read configuration
     configname = Path(args.pop("config"))
     if not configname.is_file() and not configname.is_absolute():
-        configname = Path(sys.prefix) / "etc" / "dps" / configname
+        configname = Path(sys.prefix) / "etc" / "dps" / "df" / configname
     if verbose:
         print(f"** Loading config: {configname}", flush=True)
     with open(configname, encoding="utf-8") as f:

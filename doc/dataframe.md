@@ -93,7 +93,7 @@ The configuration is a YAML file with the following sections:
  * `preprocess`: defines the preprocessing blocks to apply
  * `logging`: defines configuration for loggers
 
-There is an [example configuration](../configs/preproc_df.yaml) available.
+There is an [example configuration] available.
 
 
 ### 2.2 Source data
@@ -119,14 +119,15 @@ Note that the Spark DataFrame reader has native capabilities:
    will be prefixed with a `spark.hadoop.fs.s3a.` prefix)
 
 
-## 3. Processing
+## 3. Available processing
 
 Implemented preprocessing steps are:
  * [langfilter]: language detection and filtering
  
-## 4. Implementtation of prrocessing steps
 
-Each step to be applied to the data must be implemented as a file inside the
+## 4. Implementtation of a processing module
+
+Each processing module must be implemented as a file inside the
 [udf](../dps/spark_df/udf) directory.
 
   * The implementation should be a class
@@ -139,17 +140,20 @@ Each step to be applied to the data must be implemented as a file inside the
 	  - Each Dataframe row is a document; there will be at least a `text`column
 	  - The method must process the DataFrame and return the result, also
 	    as a FataFrame
-  * Once the preprocessor is implemented, add its initialization code to the
-    `_init_obj` method in the [preproc] object.
+  * Once the preprocessor is implemented, add it to the [preproc] object:
+     - add its initialization code to the `_init_obj()` method
+     - add any new generated columns to the schema() method
+	 - call the initialized class in the `__call__()` method
 
 
 You can check the [langfilter](../dps/spark_df/udf/langfilter.py) preprocessor
 as an example.
 
 
-[pyspark]: https://pypi.org/project/pyspark
-[Pandas UDF]: https://spark.apache.org/docs/3.1.2/api/python/user_guide/arrow_pandas.html#pandas-function-apis
-[S3 provider]: https://spark.apache.org/docs/latest/cloud-integration.html#installation
-[configuration file]: ../configs/preproc_df.yaml
+[example configuration]: ../configs/df/preproc_df.yaml
+[configuration file]: ../configs/df/preproc_df.yaml
 [langfilter]: udf/langfilter.md
 [preproc]: ../dps/spark_df/preproc.py
+[pyspark]: https://pypi.org/project/pyspark
+[Pandas UDF]: https://spark.apache.org/docs/latest/api/python/user_guide/sql/arrow_pandas.html#map
+[S3 provider]: https://spark.apache.org/docs/latest/cloud-integration.html#installation
