@@ -1,8 +1,7 @@
-base_dir: './datasets/japanese_test_dataset'
+base_dir: './datasets/test_thai_jsonl_data'
 targets:
-  - 0
-  - 1
-output_dir: './datasets/japanese_job_outputs'
+  - input
+output_dir: './datasets/test_thai_jsonl_data/output'
 
 n_dist: 10
 n_output: 1
@@ -16,4 +15,4 @@ symbol_to_word_ratio: 0.1
 bullet_point_ratio: 0.9
 ellipsis_ratio:  0.3
 japanese_word_ratio: 0.8
-freq_char_cnt: 1
+freq_char_ratio: 0.9

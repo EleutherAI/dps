@@ -1,8 +1,7 @@
 # DPS (Data Processing System)
 
-
 **Note**: there are two frameworks for running Spark-based processing jobs in DPS
-  * An RDD-based framework described in this README
+  * An RDD-based framework, which is described in this README
   * A DataFrame-based framework, described in [a separate document](doc/dataframe.md)
 
 

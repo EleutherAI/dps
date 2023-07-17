@@ -15,3 +15,9 @@ CARD_END_TOKEN = "<|crd_end|>"
 
 ACCOUNT_START_TOKEN = "<|acc_start|>"
 ACCOUNT_END_TOKEN = "<|acc_end|>"
+
+NAME_START_TOKEN = "<|name_start|>"
+NAME_END_TOKEN = "<|name_end|>"
+
+ORG_START_TOKEN = "<|org_start|>"
+ORG_END_TOKEN = "<|org_end|>"

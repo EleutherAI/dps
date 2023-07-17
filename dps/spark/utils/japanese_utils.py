@@ -169,3 +169,10 @@ BAD_WORD_LIST_2 = [
     "xxx"
 ]
 BAD_WORD_LIST = BAD_WORD_LIST_1 + BAD_WORD_LIST_2
+
+JAPANESE_FREQ_CHAR_LIST = [
+    "て", "に", "を", "は",
+    # "と","の",
+    "へ",
+    "です", "だ",
+]

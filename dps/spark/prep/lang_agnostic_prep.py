@@ -1,3 +1,4 @@
+from ast import Index
 import html
 import re
 
@@ -54,9 +55,16 @@ def bullet_ellipsis_filter(
     ellipsis = ["…", "..."]
     sentences = text.strip().split("\n")
 
-    bullet_ratio_of_example = len(
-        [sentence for sentence in sentences if sentence.strip()[0] in bullets]
-    ) / len(sentences)
+    # print('\n'.join(sentences))
+    try:
+        bullet_ratio_of_example = len(
+            [sentence for sentence in sentences 
+                if len(sentence.strip()) > 0 and sentence.strip()[0] in bullets]
+        ) / len(sentences)
+    except IndexError:
+        print(f"IndexError: {sentences}")
+        raise IndexError
+    
     ellipsis_endings = 0
     for sentence in sentences:
         for symbol in ellipsis:

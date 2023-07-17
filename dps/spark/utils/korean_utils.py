@@ -291,6 +291,8 @@ _WEBSITE_FOOTER = [
     for suffix in [":", " :"]
 ]
 SPAM_SPLIT = [
+    # 이전 모델에서 많이 나오던 패턴.
+    "공유하기 글 요소",
     # 지금까지 (공백 0~6개) ~~기자였습니다.
     re.compile(
         r"(?i)(?:\b(지금까지|.{2,7}에서)\b)\W+(?:\w+[^\w]+){0,6}?\b(기자|특파원|교통정보|KBS 뉴스|SBS 뉴스|MBC 뉴스|YTN|MBN|뉴스더하기)"
@@ -307,25 +309,8 @@ SPAM_REMOVE = [
         # 사진=연합뉴스
         re.compile("\(+.+=연합뉴스\)+.+(기자 =|특파원 =)|=연합뉴스|"),
         "",
-    ),
-    # yyyy.mm.dd <|email|>
-    (
-        re.compile("([0-9]{4}\.[0-9]{1,2}\.[0-9]{1,2})( |\w)(<\|email\|>|<\|url\|>)"),
-        "",
-    ),
-    # ~~했다. <|email|>
-    (
-        re.compile("(다\. <\|email\|>)|다\. <\|url\|>"),
-        "다.",
-    ),
-    # ~~~기자 <|email|>
-    (
-        re.compile("기자 <\|email\|>"),
-        "기자",
-    ),
+    )
 ]
-
-REPEATED_JAMO = re.compile(r"[ㄱ-ㅎㅏ-ㅣ]{20,}")
 
 BAD_WORDS = [
     "콜걸",

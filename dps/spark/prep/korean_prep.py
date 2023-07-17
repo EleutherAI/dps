@@ -3,6 +3,8 @@ import sys
 
 import html2text
 from bs4 import BeautifulSoup
+import re
+import unicodedata
 
 from dps.spark.utils.korean_utils import (
     KOR_BEGIN,
@@ -164,7 +166,12 @@ def remove_html_tags(text: str):
         return text.strip()
 
     if bool(BeautifulSoup(text, "html.parser").find()):
-        text = html2text.html2text(text)
+        try:
+            processed_html = html2text.html2text(text)
+        except AssertionError:
+            processed_html = text
+        
+        text = processed_html
         text = clean_space(text)
 
         for pattern in [
@@ -237,4 +244,11 @@ def replace_korean_pii(text: str):
     for before, after in replaces:
         text = text.replace(before, after)
 
+    return text
+
+
+def make_compat(text):
+    # code by kyubyong park
+    text = unicodedata.normalize("NFC", text)
+    text = re.sub("[\u1100-\u11FF]", "", text)
     return text

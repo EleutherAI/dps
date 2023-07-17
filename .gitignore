@@ -383,5 +383,9 @@ dmypy.json
 # End of https://www.toptal.com/developers/gitignore/api/python,intellij,pycharm+iml,pycharm,vscode
 
 *~
+*.out
+*.err
+*_sbatch.sh
+
 /*.bz2
 /data

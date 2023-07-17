@@ -1,23 +1,11 @@
-"""
-Run this from project root path
-
-python bin/sparkapp.py korean_job --config_path=./configs/korean_job.yaml
-"""
-
-import os
-import yaml
-from pyspark import SparkContext
-from pyspark.rdd import RDD
-
-from dps.spark.prep.korean_prep import (
-    korean_word_ratio_filter,
-    reduce_emoticon,
-    replace_korean_pii,
-    spam_words_filter,
+from dps.spark.prep.indonesia_prep import (
     remove_html_tags,
     bad_words_filter,
-    make_compat,
+    reduce_emoticon,
+    replace_indonesia_pii
+
 )
+
 from dps.spark.prep.lang_agnostic_prep import (
     doc_len_filter,
     mean_word_len_filter,
@@ -28,6 +16,7 @@ from dps.spark.prep.lang_agnostic_prep import (
     replace_email_and_url,
     remove_repeated_text,
 )
+
 from dps.spark.spark_session import spark_session, spark_session_for_cluster
 from dps.spark.utils.io_utils import read_line, to_json
 
@@ -38,8 +27,27 @@ def preprocess_text(input_text: str):
         reduce_emoticon,
         remove_whitespace,
         replace_email_and_url,
-        replace_korean_pii,
-        spam_words_filter,
+        remove_html_tags,
+        remove_repeated_text,
+    ]
+
+    for func in processing_function_list:
+        input_text = func(input_text)
+
+    if isinstance(input_text, str):
+        processed_text = input_text
+    else:
+        processed_text = " ".join(input_text)
+
+    return processed_text
+
+def preprocess_text(input_text: str):
+    processing_function_list = [
+        process_html_and_uri_text,
+        reduce_emoticon,
+        remove_whitespace,
+        replace_email_and_url,
+        replace_indonesia_pii,
         remove_html_tags,
         remove_repeated_text,
     ]
@@ -55,33 +63,19 @@ def preprocess_text(input_text: str):
     return processed_text
 
 
-def korean_job(config_path):
+def romance_job(config_path):
     with open(config_path) as f:
         conf = yaml.load(f, Loader=yaml.FullLoader)
 
-    if conf['targets'] == ['all']:
-        input_paths = f'{conf["base_dir"]}/*/*.jsonl'
-    else:
-        input_paths = ','.join([f'{conf["base_dir"]}/{t}/*.jsonl' for t in conf["targets"]])
+    input_paths = ",".join([f'{conf["base_dir"]}/{t}' for t in conf["targets"]])
     session_fn = spark_session_for_cluster if conf["is_cluster"] else spark_session
 
-    with session_fn("korean text processing job") as spark:
+    with session_fn("romance text processing job") as spark:
         sc: SparkContext = spark.sparkContext
-
-        # set heap memorty
-        sc._conf.set('spark.driver.memory', '15g')
-
-        print(sc.getConf().getAll())
         proc_rdd: RDD = (
-            sc.textFile(input_paths).repartition(conf["n_dist"])
+            sc.textFile(input_paths)
+            .repartition(conf["n_dist"])
             .flatMap(read_line)
-            .map(
-                lambda x: dict(
-                    text=make_compat(
-                        x["text"],
-                    ),
-                )
-            )
             .filter(
                 lambda x: bad_words_filter(
                     x["text"],
@@ -112,12 +106,6 @@ def korean_job(config_path):
                     x["text"],
                     conf["bullet_point_ratio"],
                     conf["ellipsis_ratio"],
-                )
-            )
-            .filter(
-                lambda x: korean_word_ratio_filter(
-                    x["text"],
-                    conf["korean_word_ratio"],
                 )
             )
             .map(

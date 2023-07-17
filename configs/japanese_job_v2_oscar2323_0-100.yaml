@@ -1,13 +1,14 @@
-base_dir: './datasets/japanese_test_dataset'
+base_dir: 'PROJECT_DIR/datasets/'
 targets:
-  - 0
-  - 1
-output_dir: './datasets/japanese_job_outputs'
+  - "oscar2323_0-100"
+output_dir: 'PROJECT_DIR/datasets/oscar2323_0-100_QFv2'
 
-n_dist: 10
+n_dist: 128
 n_output: 1
-is_cluster: False
+is_cluster: True
+is_local: False
 
+use_column: "content"
 min_doc_len: 50
 max_doc_len: 100000
 min_mean_word_len: 1
@@ -17,3 +18,4 @@ bullet_point_ratio: 0.9
 ellipsis_ratio:  0.3
 japanese_word_ratio: 0.8
 freq_char_cnt: 1
+separator_ratio: 0.1
