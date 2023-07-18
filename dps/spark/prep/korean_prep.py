@@ -160,17 +160,18 @@ def reduce_emoticon(text: str, num_repeats=2):
 
 def remove_html_tags(text: str):
     def clean_space(text):
-        text = re.sub("[\r\n\f\v\t]", " ", text)
+        # text = re.sub("[\r\n\f\v\t]", " ", text)
         while "  " in text:
             text = text.replace("  ", " ")
         return text.strip()
 
     if bool(BeautifulSoup(text, "html.parser").find()):
         try:
-            processed_html = html2text.html2text(text)
+            pre_process = text.replace("\n", "<br>")
+            processed_html = html2text.html2text(pre_process)
         except AssertionError:
             processed_html = text
-        
+
         text = processed_html
         text = clean_space(text)
 
@@ -252,3 +253,24 @@ def make_compat(text):
     text = unicodedata.normalize("NFC", text)
     text = re.sub("[\u1100-\u11FF]", "", text)
     return text
+
+
+
+def __test__():
+    test_text = "안녕하세요.\n제 이름은 양기창 입니다.<br>          반가워요"
+    print(test_text)
+
+    function_list = [
+        reduce_emoticon,
+        replace_korean_pii,
+        spam_words_filter,
+        remove_html_tags,
+    ]
+
+    for func in function_list:
+        test_text = func(test_text)
+        print(f"Function name: {func.__name__} \n{test_text}\n\n")
+
+
+if __name__ == "__main__":
+    __test__()
