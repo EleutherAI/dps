@@ -111,36 +111,40 @@ def replace_email_and_url(text: str):
 
 
 def remove_repeated_text(input_text, ngram_range=(3, 13), trial=3):
+    # TODO: Algorithm is wrong. Need to fix.
     def _remove_repeated_phrase(input_text, ngram_range):
-        words = input_text.split()
-        repeated_part_spans = []
+        # words = input_text.replace('\n', '<br>').split()
+        # repeated_part_spans = []
 
-        for i, word in enumerate(words):
-            prev_ngrams = {
-                j: " ".join(words[i - j : i])
-                for j in range(ngram_range[0], ngram_range[1] + 1)
-            }
-            next_ngrams = {
-                j: " ".join(words[i + 1 : i + j + 1])
-                for j in range(ngram_range[0], ngram_range[1] + 1)
-            }
+        # for i, word in enumerate(words):
+        #     prev_ngrams = {
+        #         j: " ".join(words[i - j : i])
+        #         for j in range(ngram_range[0], ngram_range[1] + 1)
+        #     }
+        #     next_ngrams = {
+        #         j: " ".join(words[i + 1 : i + j + 1])
+        #         for j in range(ngram_range[0], ngram_range[1] + 1)
+        #     }
 
-            for j, (prev_ngram, next_ngram) in enumerate(
-                zip(prev_ngrams.values(), next_ngrams.values())
-            ):
-                if prev_ngram == next_ngram:
-                    repeated_part_spans.append(((i - j, i), (i + 1, i + j + 1)))
+        #     for j, (prev_ngram, next_ngram) in enumerate(
+        #         zip(prev_ngrams.values(), next_ngrams.values())
+        #     ):
+        #         if prev_ngram == next_ngram:
+        #             repeated_part_spans.append(((i - j, i), (i + 1, i + j + 1)))
 
-        for word_pos, word in enumerate(words):
-            for span in repeated_part_spans:
-                if word_pos in range(span[0][0], span[0][1]) or word_pos in range(
-                    span[1][0], span[1][1]
-                ):
-                    words[word_pos] = ""
+        # for word_pos, word in enumerate(words):
+        #     for span in repeated_part_spans:
+        #         if word_pos in range(span[0][0], span[0][1]) or word_pos in range(
+        #             span[1][0], span[1][1]
+        #         ):
+        #             print(word_pos, word, span)
+        #             words[word_pos] = ""
 
-        input_text = " ".join(words)
-        input_text = re.sub(r"\s+", " ", input_text)
-        return input_text.strip(), repeated_part_spans
+        # print(words)
+        # input_text = " ".join(words)
+        # input_text = re.sub(r"\s+", " ", input_text)
+        # return input_text.strip(), repeated_part_spans
+        return input_text, []
 
     def _remove_repeated_word_over_n_times(input_text, n=3):
         words = input_text.split()
@@ -163,10 +167,32 @@ def remove_repeated_text(input_text, ngram_range=(3, 13), trial=3):
         input_text = re.sub(r"\s+", " ", input_text)
         return input_text
 
+    input_text = input_text.replace('\n', '<br>')
     total_len_spans = 0
     for _ in range(trial):
         input_text, spans = _remove_repeated_phrase(input_text, ngram_range)
         total_len_spans += len(spans)
 
     input_text = _remove_repeated_word_over_n_times(input_text)
+    input_text = input_text.replace('<br>', '\n')
     return input_text
+
+
+def __test__():
+    func_list = [
+        remove_whitespace,
+        process_html_and_uri_text,
+        replace_email_and_url,
+        remove_repeated_text,
+    ]
+
+    text = "Hello\nMy name is       Kevin.\nMy personal Ifno\nemail: ygdsag@gmail.com\n\nPhone:849-5432-1235\nBank Account:\n1234-1234-1234-1234\n\n"
+
+    for func in func_list:
+        print(func.__name__)
+        print(func(text))
+        print()
+        
+
+if __name__ == "__main__":
+    __test__()
