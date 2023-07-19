@@ -33,7 +33,7 @@ HADOOP_VERSION = {
 def s3_session_credentials(config: Dict) -> Dict:
     """
     Use the boto3 library to get credentials for an S3 session
-    For this to worl, the AWS account needs to have IAM Assumed Roles permission
+    For this to work, the AWS account needs to have IAM Assumed Roles permission
     """
     arn = config.pop("arn", "arn:aws:iam::842865360552:role/s3_access_from_ec2")
     session_hours = config.pop("session_duration", DEFAULT_S3_DURATION)
@@ -133,6 +133,10 @@ def build_spark_session(appname: str = None, master: str = None,
                         config: Dict = None, s3: bool = False) -> SparkSession:
     """
     Create a Spark session
+      :param appname: name to give to the running Spark application
+      :param master: Spark master (if different from the config)
+      :param config: configuration deininig Spark launching parameters
+      :param s3: activate S3 support in the Spark session
     """
     os.environ["PYSPARK_PYTHON"] = sys.executable
     os.environ["PYSPARK_DRIVER_PYTHON"] = sys.executable
@@ -184,12 +188,12 @@ def build_spark_session(appname: str = None, master: str = None,
     spark = sb.getOrCreate()
 
     # Adjust logging for Spark
-    loglevel = config.get("logging", {}).get("level")
-    if loglevel:
+    spark_loglevel = config.get("spark_logging", {}).get("level")
+    if spark_loglevel:
         # Set Spark log level
-        spark.sparkContext.setLogLevel(loglevel)
+        spark.sparkContext.setLogLevel(spark_loglevel)
         # Log Spark config
-        if logging.getLevelName(loglevel) <= logging.DEBUG:
+        if logging.getLevelName(spark_loglevel) <= logging.DEBUG:
             conf = spark.sparkContext.getConf().getAll()
             log.debug("Spark config:\n  %s",
                       "\n".join(f"  {k}={v}" for k, v in sorted(conf)))

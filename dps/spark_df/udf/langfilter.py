@@ -17,13 +17,12 @@ from operator import itemgetter
 
 from filelock import FileLock
 import pandas as pd
-import fasttext
 from fasttext.FastText import _FastText
 
 from typing import Dict, List
 
 from ..utils import logging
-
+from ..utils.misc import recursive_update
 
 
 # Default local directory where to keep the downloaded model
@@ -32,16 +31,18 @@ DEFAULT_LOCALDIR = "/tmp"
 DEFAULT_CONFIG = {
     # URL for the model
     "model_url": "https://dl.fbaipublicfiles.com/fasttext/supervised-models/lid.176.ftz",
-    # Number of lines per chunk
-    "chunk_size": 20,
-    # Maximum number of chunks to analyze
-    "max_chunks": 10,
-    # Minimum score in a chunk to accept a detected language
-    "min_lang_score": 0.80,
-    # Minimum ratio of chunks with valid languages
-    "min_chunk_ratio": 0.60,
-    # Minimum chunk ratio for a retained language
-    "min_lang_ratio": 0.30
+    "params": {
+        # Number of lines per chunk
+        "chunk_size": 20,
+        # Maximum number of chunks to analyze
+        "max_chunks": 10,
+        # Minimum score in a chunk to accept a detected language
+        "min_lang_score": 0.80,
+        # Minimum ratio of chunks with valid languages
+        "min_chunk_ratio": 0.60,
+        # Minimum chunk ratio for a retained language
+        "min_lang_ratio": 0.30
+    }
 }
 
 
@@ -81,11 +82,10 @@ class LangFilter:
         self.log = logging.getLogger(__name__)
 
         # Load config
-        self.config = DEFAULT_CONFIG.copy()
-        self.config.update(config)
-        self.log.info("config: %s", self.config)
+        self.config = recursive_update(DEFAULT_CONFIG, config)
+        self.log.info("config = %s", self.config)
 
-        # Prepare language filter function
+        # Prepare the language filter function
         lang = self.config.get("keep_lang")
         if lang:
             lang = set([lang] if isinstance(lang, str) else lang)
@@ -98,13 +98,17 @@ class LangFilter:
                                       self.config.get("model_localdir"))
 
 
+    def __repr__(self) -> str:
+        return f"<LangFilter {self.config['model_url']}>"
+
+
     def _load_model(self, model_url: str, model_localdir: str) -> _FastText:
         """
         Load the model
         """
         # Get the model filename
         model_file = model_filename(model_url, model_localdir)
-        self.log.info("model filename: %s", model_file)
+        self.log.info("model filename = %s", model_file)
 
         # Ensure the model file is locally available
         filename = str(model_file)
@@ -125,10 +129,12 @@ class LangFilter:
         # Split by newlines (since fasttext only evaluates single lines)
         lines = re.split(r"[\n\r]+", text)
 
+        # Get detection parameters
+        params = self.config["params"]
+
         # Select the chunks we will analyze
-        chunk_size = self.config["chunk_size"]
-        chunklist = select_chunks(len(lines), chunk_size,
-                                  self.config["max_chunks"])
+        chunk_size = params["chunk_size"]
+        chunklist = select_chunks(len(lines), chunk_size, params["max_chunks"])
         num_chunks = len(chunklist)
         self.log.trace("num_chunks=%d", num_chunks)
 
@@ -148,18 +154,19 @@ class LangFilter:
             # Retain all the languages with score greater than the threshold
             is_valid = False
             for lang, prob in zip(*r):
-                if prob > self.config["min_lang_score"]:
+                if prob > params["min_lang_score"]:
                     res[lang[9:]] += 1
                     is_valid = True
             valid_chunks += is_valid
-            self.log.trace("retained: lang=%s", dict(res))
+            self.log.trace("retained lang=%s", dict(res))
 
-        if valid_chunks < num_chunks*self.config["min_chunk_ratio"]:
+        # Check if we've got a minimum number of correctly analyzed chunks
+        if valid_chunks < num_chunks*params["min_chunk_ratio"]:
             self.log.trace("failed: min_chunk_ratio")
             return ""
 
         # Evaluate the language ratios, keeping only the languages above minimum
-        minval = self.config["min_lang_ratio"]*num_chunks
+        minval = params["min_lang_ratio"]*num_chunks
         self.log.trace("minval: %f", minval)
         result = sorted(((k[0], k[1]) for k in res.items() if k[1] >= minval),
                         key=itemgetter(1), reverse=True)

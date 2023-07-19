@@ -1,3 +1,9 @@
+"""
+Utilities for reading/writing DataFrames
+"""
+
+
+from pathlib import Path
 
 from typing import Dict
 
@@ -17,11 +23,15 @@ def read_sources(spark: SparkSession, source: Dict):
         LOGGER = logging.getLogger(__name__)
 
     try:
+        # Source format
         fmt = source["format"]
-        if 'paths' in source:
-            sources = [source['base'] + p for p in source['paths']]
-        else:
+        if fmt == "jsonl":
+            fmt = "json"
+        # Source files
+        if 'paths' not in source:
             sources = source['base']
+        else:
+            sources = [source['base'] + p for p in source['paths']]
     except KeyError as e:
         raise Exception(f"invalid source config: missing field: {e}")
     options = source.get('options') or {}
@@ -43,7 +53,7 @@ def write_dataframe(df: DataFrame, dest: Dict):
     except KeyError as e:
         raise Exception(f"invalid destination config: missing {e}")
 
-    LOGGER.info("Outname: %s", outname)
+    LOGGER.info("outname = %s", outname)
 
     outopts = dest.get("options") or {}
     mode = dest.get("mode", "errorifexists")
@@ -52,7 +62,7 @@ def write_dataframe(df: DataFrame, dest: Dict):
 
     num_part = dest.get("partitions")
     if num_part:
-        LOGGER.info("Repartitioning: %d", num_part)
+        LOGGER.info("repartitioning = %d", num_part)
         df = df.repartition(num_part)
 
     df.write.format(fmt).mode(mode).options(**outopts).save(outname)

@@ -20,7 +20,7 @@ def process(args: Dict):
     # Import the main processing code, now that the path should contain Spark
     from dps.spark_df.utils.spark_session_utils import spark_session
     from dps.spark_df.utils.io import read_sources, write_dataframe
-    from dps.spark_df.preproc import UdfPreprocessor
+    from dps.spark_df.udfprocessor import UdfProcessor
 
     verbose = args.pop("verbose", 1)
 
@@ -33,12 +33,13 @@ def process(args: Dict):
     with open(configname, encoding="utf-8") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
 
-    for r in "io", "preprocess":
+    # Check we've got compulsory sections
+    for r in "io", "process":
         if r not in config:
             raise Exception(f"invalid config: missing field {r}")
 
     # Activate logging
-    logcfg = config.get("logging")
+    logcfg = config.get("logging") or {}
     logbasic = logcfg.get("logconfig")
     if logbasic:
         if logcfg.get("reset"):
@@ -50,7 +51,8 @@ def process(args: Dict):
     LOGGER.info("START")
 
     # Set the Python that will be run by Spark executors
-    python = config.get("python") or Path(sys.prefix) / "bin" / "python"
+    general = config.get("general")
+    python = general.get("python") or Path(sys.prefix) / "bin" / "python"
     environ["PYSPARK_PYTHON"] = str(python)
 
     # Check input & output
@@ -73,12 +75,12 @@ def process(args: Dict):
 
         if LOGGER.getEffectiveLevel() >= logging.INFO:
             conf = spark.sparkContext.getConf().getAll()
-            LOGGER.info("Spark config:\n  %s",
+            LOGGER.info("spark config =\n  %s",
                         "\n  ".join(sorted("=".join(v) for v in conf)))
 
-        # Create the preprocessor UDF
-        preproc = UdfPreprocessor(config["preprocess"],
-                                  seed=config.get("seed"), logconfig=logbasic)
+        # Create the processor UDF
+        preproc = UdfProcessor(config["process"], seed=config.get("seed"),
+                                  logconfig=logbasic)
 
         # Process all content
         for io in iolist:
@@ -94,12 +96,12 @@ def process(args: Dict):
                                         spark.sparkContext.defaultParallelism)
             LOGGER.info("partitions: source=%d target=%d", cur_part, tgt_part)
             if cur_part != tgt_part:
-                LOGGER.info("repartitioning to %d", tgt_part)
+                LOGGER.info("repartitioning=%d", tgt_part)
                 df1 = df1.repartition(tgt_part)
 
             # Send for execution
             schema_out = preproc.schema(df1.schema)
-            LOGGER.info("Output schema:\n  %s", schema_out)
+            LOGGER.info("output schema =\n  %s", schema_out)
             df2 = df1.mapInPandas(preproc, schema_out)
 
             # Save results

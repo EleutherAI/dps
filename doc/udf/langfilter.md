@@ -1,6 +1,6 @@
 # Language detection and filtering
 
-This module performs two functions:
+This processor performs two functions:
  * detects language in the text
  * filters records according to a set of desired languages
  
@@ -47,9 +47,21 @@ configuration options.
 
 If the configuraion contains a non-empty `keep_lang` field, it should contain
 a list of language codes to retain. Then, DataFrame rows whose `detectedLang`
-column do not contain _at least one of the languages in the list_ are
-discarded from the output.
+column do not contain _at least one of the languages in the list_ are discarded
+from the output.
 
-  
+
+## Configuration
+
+The preprocessing configuration dict for the module can contain (apart from
+the standard `class` and `columns` fields) the following elements:
+
+ * `model_url`: URL of the FastText model to download (by default it will
+   download the 1M 176-lang model)
+ * `params`: parameters that control the way input text is split and analyzed
+ * `keep_lang`: list of languages to keep in the filter (if not present,
+   no filtering is done)
+
+
 [fasttext]: https://fasttext.cc/docs/en/language-identification.html
 [ISO 639-1]: https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes

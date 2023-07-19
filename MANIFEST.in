@@ -1,6 +1,7 @@
 include LICENSE
 include requirements-df.txt
 include configs/*.yaml
+include configs/**/*.yaml
 include README.md
 include doc/*.md
 include doc/**/*.md
