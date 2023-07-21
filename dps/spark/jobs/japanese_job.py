@@ -68,7 +68,6 @@ def japanese_job(config_path: str):
             .filter(lambda x: bullet_ellipsis_filter(x[use_column], conf["bullet_point_ratio"], conf["ellipsis_ratio"]))
             .filter(lambda x: japanese_word_ratio_filter(x[use_column], conf["japanese_word_ratio"]))
             .filter(lambda x: dict(text=preprocess_text(x[use_column])))
-            .filter(lambda x: doc_len_filter(x[use_column], conf["min_doc_len"], conf["max_doc_len"]))
             .filter(lambda x: japanese_frequent_char_existence_filter(x[use_column], conf["freq_char_cnt"]))
             .filter(lambda x: reduce_japanese_emoticon(x[use_column]))
             .filter(lambda x: many_separators_filter(x[use_column], conf["separator_ratio"]))
