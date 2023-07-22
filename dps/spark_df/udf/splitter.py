@@ -12,6 +12,7 @@ from typing import Dict, List, Iterator
 
 from ..utils import logging
 from ..utils.misc import recursive_update, chunker
+from ..defs import DEFAULT_DOC_COLUMN
 
 
 # End of sentence punctuation for Latin, Devanagari, Chinese & Arabic scripts
@@ -64,6 +65,7 @@ class DocSplitter:
 
         # Load config
         self.config = recursive_update(DEFAULT_CONFIG, config.get("params"))
+        self.coldoc = DEFAULT_DOC_COLUMN
         self.log.info("config = %s", self.config)
 
         # Main regular expression
@@ -157,13 +159,13 @@ class DocSplitter:
             self.log.trace("splitter id:\n%s", df["id"].to_string())
 
         # Split
-        df.loc[:, "text"] = df["text"].map(self._splitter)
+        df.loc[:, self.coldoc] = df[self.coldoc].map(self._splitter)
 
         # Add part number
         df.loc[:, "part"] = df.apply(add_part, axis=1)
 
         # Expand the chunks into rows
-        df = df.explode(["part", "text"])
+        df = df.explode(["part", self.coldoc])
 
         # Update the id column
         if has_id:

@@ -27,6 +27,8 @@ def parse_args(args: List[str]) -> argparse.Namespace:
                         help="Reraise on exceptions")
     parser.add_argument("--verbose", type=int, default=1,
                         help="verbosity level")
+    parser.add_argument("--max-docs", type=int,
+                        help="maximum number of documents to process")
     return parser.parse_args(args)
 
 

@@ -1,6 +1,7 @@
-# Adding a processor module
+# Adding an UDF processor module
 
-A new processor module can be added to the DataFrame-based workflow by:
+A new UDF processor module can be added to the Pandas DataFrame-based workflow
+by:
 1. Implementing the processor as a callable Python class
 2. Adding configuration for that processor in the configuration file
 
@@ -102,7 +103,7 @@ class Example:
 
     def __call__(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Process the DataFrame
+        Process a Pandas DataFrame
         """
         size = len(df)
 
@@ -121,7 +122,7 @@ class Example:
 
 To use this processor, the steps are:
   * add the code to an `example.py` file in the [udf] folder
-  * add configuration for this processor to the `process` configuration
+  * add configuration for this processor to the `process_udf` configuration
     section, as
 	
 	      - class: example.Example

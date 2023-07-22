@@ -3,11 +3,12 @@ Miscellaneous utilities
 """
 
 from itertools import islice
+import importlib
 from collections.abc import Mapping, Sequence
 
-from typing import Dict, Iterable
+from typing import Dict, Iterable, Type
 
-from .exception import ProcException
+from .exception import ProcException, SetupException
 
 
 def recursive_update(dst: Dict, src: Dict, lev: int = 0) -> Dict:
@@ -31,6 +32,19 @@ def recursive_update(dst: Dict, src: Dict, lev: int = 0) -> Dict:
     except Exception as e:
         raise ProcException("cannot update dictionary: {!r}", e) from e
     return dst
+
+
+def import_object(objpath: str) -> Type:
+    """
+    Import a Python object (a function or a class) given its fully qualified
+    name
+    """
+    try:
+        modname, oname = objpath.rsplit(".", 1)
+        mod = importlib.import_module(modname)
+        return getattr(mod, oname)
+    except Exception as e:
+        raise SetupException("cannot import object '{}': {}", objpath, e) from e
 
 
 def chunker(it: Iterable[str], size: int) -> Iterable[str]:

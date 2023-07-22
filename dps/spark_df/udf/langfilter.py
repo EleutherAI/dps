@@ -23,7 +23,7 @@ from typing import Dict, List
 
 from ..utils import logging
 from ..utils.misc import recursive_update
-
+from ..defs import DEFAULT_DOC_COLUMN
 
 # Default local directory where to keep the downloaded model
 DEFAULT_LOCALDIR = "/tmp"
@@ -84,6 +84,7 @@ class LangFilter:
         # Load config
         self.config = recursive_update(DEFAULT_CONFIG, config)
         self.log.info("config = %s", self.config)
+        self.coldoc = DEFAULT_DOC_COLUMN
 
         # Prepare the language filter function
         lang = self.config.get("keep_lang")
@@ -178,7 +179,7 @@ class LangFilter:
 
     def __call__(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-         - Add a "detectedLang" column with the languages detected in the "text"
+         - Add a "detectedLang" column with the languages detected in the doc
            column
          - Optionally, filter out rows whose detected language(s) are not in
            the required list
@@ -187,7 +188,7 @@ class LangFilter:
             self.log.trace("langfilter id:\n%s", df["id"].to_string())
 
         # Detect language(s) and add the column
-        df.loc[:, "detectedLang"] = df["text"].map(self._langdetect)
+        df.loc[:, "detectedLang"] = df[self.coldoc].map(self._langdetect)
 
         # Filter to keep only the desired languages
         if self.langfilter:

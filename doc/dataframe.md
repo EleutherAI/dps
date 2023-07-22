@@ -2,10 +2,13 @@
 
 The dps DataFrame framework allows processing of documents using Spark
 DataFrames as the wrapping infrastructure, while implementing the actual
-processing modules using only Pandas DataFrames.
+processing modules in two modalities:
+  * at the Spark level, using the Spark DataFrame API
+  * at the local Pandas level, using only Pandas DataFrames. This is done
+    by using a `UdfProcessor` module that is executed as a [Pandas UDF]
+	within Spark
 
-It does so by using a `UdfProcessor` module that is executed as a [Pandas
-UDF] within Spark, and is governed by a [configuration file]
+The full processing is defined in a [configuration file]
 
 
 ## 1. Installation
@@ -97,9 +100,9 @@ The configuration is a YAML file with the following sections:
  * `io`: defines the data source & destination. It can be a single dict, with
    elements `source` and `dest`, or a list of dicts (which will be processed
    sequentially).
- * `process`: defines the processing blocks to apply
+ * `process_df` and `process_udf`: define the processing blocks to apply
 
-The `io` and `process` sections are compulsory. There is an [example
+The `io` and at least one process section are compulsory. There is an [example
 configuration] available.
 
 
@@ -156,40 +159,46 @@ different number when writing.
 
 ### 2.4 Processing
 
-The `process` field in a configuration contains a list of dictionaries. Each
-one describes the configuration for a single processor; the system will call
-each processor in the same order given in the `process` list.
+Processing is done in three steps; each one of them is optional (but there
+must be at least one):
+
+1. First comes a Spark DataFrames processing step, defined as the `phase_1` in
+   the `process_df` config
+2. Then the UDF processors defined in the `process_udf` config
+3. The last step is another Spark DataFrames section, the `phase_2` in the
+   `process_df` config
+
+Each one of these sections contains a list of dictionaries. Each dictionary
+describes the configuration for a single processor; the system will call each
+processor in the same order given in the list.
 
 
 ## 3. Available processing
 
-Implemented processor modules are:
+There are two implemented UDF processor modules:
  * [splitter]: split documents into pieces
  * [langfilter]: language detection and filtering
  
 
 ## 4. Adding capabilities
 
-To add more capabilities to a processing pipeline, there are three
-alternatives:
+To add more capabilities to a processing pipeline, there are three alternatives:
 
-1. The most integrated one is to [implement a new processor module], which then
-   can be added to the configration file and will be called as a regular
-   processor inside the processing loop.
-2. It may also be needed to implement processing operations at the global Spark
-   DataFrame level (i.e. not working on local Pandas DataFrames), maybe because
-   of the use of Spark native DataFrame or Spark ML primitives.
-   In this case add those operations to the main DataFrame processing code in
-   the [process] module. Configuration for these operations should be added to
-   the main config file, but on a section different from `process` (since that
-   one contains the list of processing operations called inside Pandas UDFs).
+1. [Implement a new udf processor module], which then can be added to the
+   `process_udf` section in the configuration file and will be called as a
+   regular processor inside the processing loop.
+2. [Implement a Spark DataFrame processor module], to come either before the
+   UDF processing (_phase_1_) or after it (_phase_2_). This could use Spark
+   native DataFrame or Spark ML primitives. Once implemented, it can be added
+   to the `process_df` section in the configuration.
 3. Finally it is also possible to implement a completely different processing
    workflow that stills reuses the Spark infrastructure (e.g. to work in Spark
    but with RDDs). For this case it is possible to use the [Spark session
    instantiation] function in a different script.
 
 
-[implement a new processor module]: adding-processors.md
+[Implement a new udf processor module]: adding-udf-processors.md
+[Implement a Spark DataFrame processor module]: adding-df-processors.md
 [Spark session instantiation]: spark-session.md
 [example configuration]: ../configs/df/preproc-example.yaml
 [configuration file]: ../configs/df/preproc-example.yaml

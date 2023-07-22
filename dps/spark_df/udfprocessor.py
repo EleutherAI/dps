@@ -4,34 +4,20 @@ Implement a processing pipeline for Spark DataFrames as a Pandas UDF
 
 from os import getpid
 import random
-import importlib
 
 import numpy as np
 import pandas as pd
 
 from pyspark.sql import types
 
-from typing import Dict, List, Iterator, Type
+from typing import Dict, List, Iterator
 
 from .utils import logging as logging
+from .utils.misc import import_object
 from .utils.exception import SetupException
 
 
 BASE_PATH = "dps.spark_df.udf."
-
-
-def import_object(objname: str) -> Type:
-    """
-    Import a Python object (a function or a class) given its fully qualified
-    name
-    """
-    objpath = BASE_PATH + objname
-    try:
-        modname, oname = objpath.rsplit(".", 1)
-        mod = importlib.import_module(modname)
-        return getattr(mod, oname)
-    except Exception as e:
-        raise SetupException("cannot import object '{}': {}", objname, e) from e
 
 
 class UdfProcessor:
@@ -62,7 +48,7 @@ class UdfProcessor:
         self.proc = []
         for preproc in self.config:
             classname = preproc.pop("class")
-            cls = import_object(classname)
+            cls = import_object(BASE_PATH + classname)
             self.proc.append((cls, preproc))
         # Delay actual initialization until first use
         self.init = False

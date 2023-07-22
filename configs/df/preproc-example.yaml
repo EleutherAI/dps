@@ -59,8 +59,13 @@ io:
 
 # -----------------------------------------------------------------------
 
-# Define processor modules
-process:
+# Define DF processor modules
+# process_df:
+#   phase_1:
+
+
+# Define UDF processor modules
+process_udf:
 
   - class: splitter.DocSplitter
     columns:
