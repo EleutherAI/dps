@@ -1,0 +1,94 @@
+# Configuration file for the DataFrame-based preprocessing of documents
+# ---------------------------------------------------------------------
+
+general:
+  # Set the random seed
+  seed: 1
+
+# -----------------------------------------------------------------------
+
+# Parameters to configure the spark session
+spark:
+  master: 'local[20]'
+  partitions: 20
+  driver:
+    memory: 4g
+  executor:
+    cores: 20
+    memory: 20g
+  config:
+    spark.sql.files.ignoreCorruptFiles: "true"
+    spark.sql.execution.arrow.maxRecordsPerBatch: 2000
+  s3_config:
+    endpoint: s3.us-west-2.amazonaws.com
+  logging:
+    level: WARN
+
+
+# Configuration for logging
+logging:
+  reset: true
+  logconfig:
+    filename: '/tmp/preproc.log'
+    level: INFO
+
+
+# -----------------------------------------------------------------------
+
+# Input/output files
+io:
+
+  # Define data source (JSONL files)
+  source:
+    base: 's3a://polyglot-romance-west/'
+    format: json
+    paths:
+      - 'es/2_clean/gutenberg/DATA/'
+    options:
+      pathGlobFilter: '*.jsonl.bz2'
+      encoding: 'utf-8'
+
+  # Define data destination
+  dest:
+    format: json
+    name: 's3a://polyglot-romance-west/TEST/test_preproc_output'
+    mode: overwrite
+    partitions: 5
+    options:
+      compression: bzip2
+
+# -----------------------------------------------------------------------
+
+# Define DF processor modules
+# process_df:
+#   phase_1:
+
+
+# Define UDF processor modules
+process_udf:
+
+  - class: splitter.DocSplitter
+    columns:
+      - name: part
+        type: IntegerType
+    params:
+      use_eos: true
+      min_words: 2500
+      max_words: 5000
+
+  - class: langfilter.LangFilter
+    columns:
+      - name: detectedLang
+        type: StringType
+    params:
+      chunk_size: 20
+      max_chunks: 10
+      min_lang_score: 0.8
+      min_chunk_ratio: 0.6
+      min_lang_ratio: 0.3
+    keep_lang:
+      - es
+      - fr
+      - pt
+      - it
+      - ro
