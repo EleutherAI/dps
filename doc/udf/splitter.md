@@ -10,7 +10,7 @@ part
 
 ## Rules
 
- * Split points for chunks are found by looking to either:
+ * Split points for chunks are found by looking for either:
     - paragraphs, defined as blocks separated by at least 2 newlines
 	- full sentences, defined as an end-of-sentence mark (e.g. a period) plus
 	  a newline
@@ -25,8 +25,10 @@ part
 The `params` section in the configuration for this processor can contain the
 following options:
  * `use_eos`: indicates if using end-of-sentence is acceptable as splitting
-   criterion (this corresponds to the second criterion above)
+   criterion (this corresponds to the second criterion above, i.e. "full
+   sentences"). If `False`, only the first criterion (paragraphs) will be used.
  * `min_words`: minimum size of a chunk, in words
  * `max_words`: maximum size of a chunk, in words
 
-Words are defined in the standard way, as alphanumeric sequences of characters
+Words are defined in the usual way, as alphanumeric sequences of characters
+separated by whitespace.

@@ -35,7 +35,7 @@ Each processor configuration contains:
    contain the class to instantiate, as a `module.classname` string (e.g.
    `langfilter.LangFilter`), where `module` is the module name inside the
    [udf] folder.
- * any other content in the dictionary forms the parameter that will be
+ * any other content in the dictionary forms the configuration that will be
    sent as argument to the class constructor. In particular, arguments to
    configure the behaviour of the processor should go in a `params` field.
 
@@ -90,6 +90,12 @@ class Example:
         return df
 ```
 
+Note that the constructor of the processor class receives two arguments:
+ * `config`: the configuration for this processor, taken from the
+   corresponding section in the main config
+ * `doc_column`: the dataframe column that contains the document (usually
+   it will be `text`)
+
 
 To use this processor, the steps are:
   * add the code to an `example.py` file in the [df] folder
@@ -103,17 +109,5 @@ To use this processor, the steps are:
                    min_size: 500
   
   
-Note that:
-  - this processor does not create new columns, so no `columns` field is
-    needed in the configuration
-  - the text converting code is quite trivial, so we use a simple function
-    for it (strictly speaking we did not need even that, we could have used the
-	Pandas native method `str.lower()`). If we need to use more elaborate
-	processing (esp. to use objects that need heavy initialization), we can
-	implement it as a class method instead
-	
-For examples of those more elaborate procedures, you can check the [splitter]
-and the [langfilter] processors.
-
 
 [df]: ../dps/spark_df/df
