@@ -45,7 +45,7 @@ Each processor configuration contains:
    two fields:
       - the `name` element contains the name for the new column
 	  - the `type` element contains the [pyspark data type] for the column
- * any other content in the dictionary forms the parameter that will be
+ * any other content in the dictionary forms the configuration that will be
    sent as argument to the class constructor. In particular, arguments to
    configure the behaviour of the processor should go in a `params` field.
 

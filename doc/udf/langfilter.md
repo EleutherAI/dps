@@ -1,8 +1,8 @@
 # Language detection and filtering
 
 This processor performs two functions:
- * detects language in the text
- * filters records according to a set of desired languages
+ * detects the language(s) in the text
+ * filters documents according to a set of desired languages
  
 ## I/O
 
@@ -60,7 +60,7 @@ the standard `class` and `columns` fields) the following elements:
    download the 1M 176-lang model)
  * `params`: parameters that control the way input text is split and analyzed
  * `keep_lang`: list of languages to keep in the filter (if not present,
-   no filtering is done)
+   no filtering is done, only detection)
 
 
 [fasttext]: https://fasttext.cc/docs/en/language-identification.html
