@@ -116,14 +116,15 @@ def remove_repeated_text(input_text, ngram_range=(3, 13), trial=3):
         repeated_part_spans = []
 
         for i, word in enumerate(words):
-            prev_ngrams = {
-                j: " ".join(words[i - j : i])
-                for j in range(ngram_range[0], ngram_range[1] + 1)
-            }
-            next_ngrams = {
-                j: " ".join(words[i + 1 : i + j + 1])
-                for j in range(ngram_range[0], ngram_range[1] + 1)
-            }
+            prev_ngrams = dict()
+            next_ngrams = dict()
+
+            for j in range(ngram_range[0], ngram_range[1] + 1):
+                if i - j < 0 or i + j + 1 > len(words):
+                    continue
+
+                prev_ngrams[j] = " ".join(words[i - j : i])
+                next_ngrams[j] = " ".join(words[i + 1 : i + j + 1])
 
             for j, (prev_ngram, next_ngram) in enumerate(
                 zip(prev_ngrams.values(), next_ngrams.values())
