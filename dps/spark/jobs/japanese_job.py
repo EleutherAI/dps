@@ -64,8 +64,8 @@ def japanese_job(config_path: str):
                    doc_len_filter(text, conf["min_doc_len"], conf["max_doc_len"]) and
                    japanese_mean_word_len_filter(text, conf["min_mean_word_len"], conf["max_mean_word_len"]) and
                    japanese_symbol_to_word_ratio_filter(text, conf["symbol_to_word_ratio"]) and
-                   bullet_ellipsis_filter(text, config["bullet_point_ratio"], conf["ellipsis_ratio"]) and
-                   japanese_word_ratio_filter(text, config["japanese_word_ratio"]) and
+                   bullet_ellipsis_filter(text, conf["bullet_point_ratio"], conf["ellipsis_ratio"]) and
+                   japanese_word_ratio_filter(text, conf["japanese_word_ratio"]) and
                    japanese_frequent_char_existence_filter(text, conf["freq_char_cnt"]) and
                    many_separators_filter(text, conf["separator_ratio"])
                    )
