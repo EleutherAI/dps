@@ -57,22 +57,30 @@ def japanese_job(config_path: str):
 
     with session_fn("Japanse text processing job") as spark:
         sc: SparkContext = spark.sparkContext
+
+        def ja_filters(text):
+            # Text that fails any of these filters will be removed
+            return (japanese_bad_words_filter(text) and
+                   doc_len_filter(text, conf["min_doc_len"], conf["max_doc_len"]) and
+                   japanese_mean_word_len_filter(text, conf["min_mean_word_len"], conf["max_mean_word_len"]) and
+                   japanese_symbol_to_word_ratio_filter(text, conf["symbol_to_word_ratio"]) and
+                   bullet_ellipsis_filter(text, conf["bullet_point_ratio"], conf["ellipsis_ratio"]) and
+                   japanese_word_ratio_filter(text, conf["japanese_word_ratio"]) and
+                   japanese_frequent_char_existence_filter(text, conf["freq_char_cnt"]) and
+                   many_separators_filter(text, conf["separator_ratio"])
+                   )
+
+        def ja_transform(obj, col):
+            obj[col] = preprocess_text(obj[col])
+            obj[col] = remove_symbols(obj[col])
+            return obj
+
         proc_rdd: RDD = (
             sc.textFile(input_paths)
             .repartition(conf["n_dist"])
             .flatMap(read_line)
-            .filter(lambda x: japanese_bad_words_filter(x[use_column]))
-            .filter(lambda x: doc_len_filter(x[use_column], conf["min_doc_len"], conf["max_doc_len"]))
-            .filter(lambda x: japanese_mean_word_len_filter(x[use_column], conf["min_mean_word_len"], conf["max_mean_word_len"]))
-            .filter(lambda x: japanese_symbol_to_word_ratio_filter(x[use_column], conf["symbol_to_word_ratio"]))
-            .filter(lambda x: bullet_ellipsis_filter(x[use_column], conf["bullet_point_ratio"], conf["ellipsis_ratio"]))
-            .filter(lambda x: japanese_word_ratio_filter(x[use_column], conf["japanese_word_ratio"]))
-            .filter(lambda x: dict(text=preprocess_text(x[use_column])))
-            .filter(lambda x: doc_len_filter(x[use_column], conf["min_doc_len"], conf["max_doc_len"]))
-            .filter(lambda x: japanese_frequent_char_existence_filter(x[use_column], conf["freq_char_cnt"]))
-            .filter(lambda x: reduce_japanese_emoticon(x[use_column]))
-            .filter(lambda x: many_separators_filter(x[use_column], conf["separator_ratio"]))
-            .filter(lambda x: remove_symbols(x[use_column]))
+            .filter(lambda x: ja_filters(x[use_column]))
+            .map(lambda x: ja_transform(x, use_column))
         )
         proc_rdd.repartition(conf["n_output"]).flatMap(to_json).saveAsTextFile(conf["output_dir"])
 
