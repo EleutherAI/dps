@@ -3,7 +3,6 @@ import sys
 
 import html2text
 from bs4 import BeautifulSoup
-import re
 import unicodedata
 
 from dps.spark.utils.korean_utils import (
